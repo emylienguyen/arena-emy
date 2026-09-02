@@ -66,18 +66,9 @@
     }
 
 
-    .top {
-      padding:
-        12px 16px 8px;
-
-      display: flex;
-      justify-content: space-between;
-    }
-
-
-    .name {
-      font-size: 13px;
-    }
+   .top {
+  display: none;
+}
 
 
     .status {
@@ -88,21 +79,21 @@
 
     /* CHANNEL NAV */
 
-    nav {
+   nav {
 
-      display: flex;
+  display: flex;
 
-      gap: 16px;
+  gap: 16px;
 
-      padding:
-        0 16px 12px;
+  padding:
+    12px 16px;
 
-      overflow-x: auto;
+  overflow-x: auto;
 
-      white-space: nowrap;
+  white-space: nowrap;
 
-      scrollbar-width: none;
-    }
+  scrollbar-width: none;
+}
 
 
     nav::-webkit-scrollbar {
@@ -395,17 +386,11 @@
 <header>
 
   <div class="top">
-
-    <div class="name">
-      emy
-    </div>
-
-    <div
-      class="status"
-      id="status"
-    ></div>
-
-  </div>
+  <div
+    class="status"
+    id="status"
+  ></div>
+</div>
 
 
   <nav id="nav"></nav>
