@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>emy — are.na</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #111;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* HEADER */
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: white;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+    }
+
+    .name {
+      font-weight: 500;
+      text-transform: lowercase;
+    }
+
+    .back {
+      display: none;
+      cursor: pointer;
+    }
+
+    /* CHANNEL NAVIGATION */
+
+    nav {
+      display: flex;
+      gap: 18px;
+      padding: 0 16px 12px;
+      overflow-x: auto;
+      white-space: nowrap;
+
+      scrollbar-width: none;
+    }
+
+    nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    nav button {
+      appearance: none;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      background: transparent;
+
+      font: inherit;
+      color: #888;
+      cursor: pointer;
+    }
+
+    nav button:hover,
+    nav button.active {
+      color: #111;
+    }
+
+    /* CONTENT */
+
+    main {
+      padding: 16px;
+    }
+
+    .channel-title {
+      margin: 0 0 20px;
+      font-size: 13px;
+      font-weight: normal;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* BLOCKS */
+
+    .block {
+      min-width: 0;
+    }
+
+    .block img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #f3f3f3;
+    }
+
+    .block-caption {
+      margin-top: 7px;
+      color: #777;
+      font-size: 12px;
+    }
+
+    .text-block {
+      padding: 12px;
+      background: #f3f3f3;
+      min-height: 80px;
+    }
+
+    .link-block {
+      border-top: 1px solid #ccc;
+      padding-top: 8px;
+    }
+
+    .link-title {
+      margin-bottom: 4px;
+    }
+
+    .link-url {
+      color: #888;
+      word-break: break-word;
+      font-size: 11px;
+    }
+
+    .loading,
+    .error,
+    .empty {
+      padding: 40px 0;
+      color: #888;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 550px) {
+      body {
+        font-size: 12px;
+      }
+
+      .top {
+        padding: 10px 12px;
+      }
+
+      nav {
+        padding: 0 12px 10px;
+        gap: 14px;
+      }
+
+      main {
+        padding: 12px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="top">
+    <div class="name">emy</div>
+
+    <div
+      class="back"
+      id="backButton"
+      onclick="showAll()"
+    >
+      ← all
+    </div>
+  </div>
+
+  <nav id="channelNav">
+    <button
+      class="active"
+      data-channel="all"
+      onclick="showAll()"
+    >
+      all
+    </button>
+  </nav>
+</header>
+
+<main>
+
+  <div id="channelTitle" class="channel-title">
+    all
+  </div>
+
+  <div id="content" class="grid">
+    <div class="loading">
+      loading…
+    </div>
+  </div>
+
+</main>
+
+<script>
+
+  /*
+   * YOUR ARE.NA USER
+   */
+
+  const USER = "emy-fuplg6fvywk";
+
+  /*
+   * ARE.NA V3 API
+   */
+
+  const API = "https://api.are.na/v3";
+
+
+  let channels = [];
+  let currentChannel = null;
+
+
+  /*
+   * FETCH HELPER
+   */
+
+  async function api(url) {
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(
+        "Are.na API error: " + response.status
+      );
+    }
+
+    return response.json();
+  }
+
+
+  /*
+   * LOAD YOUR CHANNELS
+   *
+   * /users/:id/contents returns content created
+   * by the user, including channels.
+   */
+
+  async function loadChannels() {
+
+    try {
+
+      const result = await api(
+        `${API}/users/${USER}/contents?per=100`
+      );
+
+      channels = result.data.filter(
+        item => item.type === "Channel"
+      );
+
+      /*
+       * Sort alphabetically.
+       */
+
+      channels.sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+
+      buildNavigation();
+
+      /*
+       * Start with ALL.
+       */
+
+      showAll();
+
+    } catch (error) {
+
+      console.error(error);
+
+      document.getElementById("content").innerHTML =
+        `<div class="error">
+          Couldn't load your Are.na channels.
+        </div>`;
+
+    }
+
+  }
+
+
+  /*
+   * BUILD CHANNEL NAVIGATION
+   */
+
+  function buildNavigation() {
+
+    const nav =
+      document.getElementById("channelNav");
+
+    nav.innerHTML = "";
+
+    /*
+     * ALL
+     */
+
+    const allButton =
+      document.createElement("button");
+
+    allButton.textContent = "all";
+    allButton.classList.add("active");
+
+    allButton.onclick = showAll;
+
+    nav.appendChild(allButton);
+
+
+    /*
+     * CHANNELS
+     */
+
+    channels.forEach(channel => {
+
+      const button =
+        document.createElement("button");
+
+      button.textContent =
+        channel.title;
+
+      button.onclick = () =>
+        showChannel(channel);
+
+      button.dataset.id =
+        channel.id;
+
+      nav.appendChild(button);
+
+    });
+
+  }
+
+
+  /*
+   * SET ACTIVE NAV ITEM
+   */
+
+  function setActive(channelId) {
+
+    document
+      .querySelectorAll("#channelNav button")
+      .forEach(button => {
+
+        button.classList.remove("active");
+
+        if (
+          channelId === "all" &&
+          button.textContent === "all"
+        ) {
+          button.classList.add("active");
+        }
+
+        if (
+          String(button.dataset.id) ===
+          String(channelId)
+        ) {
+          button.classList.add("active");
+        }
+
+      });
+
+  }
+
+
+  /*
+   * SHOW ALL
+   *
+   * This combines blocks from all your
+   * personally created channels.
+   */
+
+  async function showAll() {
+
+    currentChannel = null;
+
+    setActive("all");
+
+    document.getElementById("channelTitle")
+      .textContent = "all";
+
+    document.getElementById("backButton")
+      .style.display = "none";
+
+    const container =
+      document.getElementById("content");
+
+    container.innerHTML =
+      `<div class="loading">
+        loading…
+      </div>`;
+
+    try {
+
+      /*
+       * Fetch all channels simultaneously.
+       */
+
+      const responses =
+        await Promise.all(
+          channels.map(channel =>
+            api(
+              `${API}/channels/${channel.id}/contents?per=100`
+            )
+          )
+        );
+
+      let blocks = [];
+
+      responses.forEach((result, index) => {
+
+        const channel =
+          channels[index];
+
+        result.data.forEach(block => {
+
+          /*
+           * Don't show nested channels in ALL.
+           * We only want the actual content blocks.
+           */
+
+          if (block.type !== "Channel") {
+
+            blocks.push({
+              ...block,
+              sourceChannel: channel.title
+            });
+
+          }
+
+        });
+
+      });
+
+      renderBlocks(blocks);
+
+    } catch (error) {
+
+      console.error(error);
+
+      container.innerHTML =
+        `<div class="error">
+          Couldn't load your content.
+        </div>`;
+
+    }
+
+  }
+
+
+  /*
+   * SHOW ONE CHANNEL
+   */
+
+  async function showChannel(channel) {
+
+    currentChannel = channel;
+
+    setActive(channel.id);
+
+    document.getElementById("channelTitle")
+      .textContent = channel.title;
+
+    document.getElementById("backButton")
+      .style.display = "block";
+
+    const container =
+      document.getElementById("content");
+
+    container.innerHTML =
+      `<div class="loading">
+        loading…
+      </div>`;
+
+    try {
+
+      const result =
+        await api(
+          `${API}/channels/${channel.id}/contents?per=100&sort=position`
+        );
+
+      renderBlocks(result.data);
+
+      /*
+       * When clicking a channel, scroll to top.
+       */
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      container.innerHTML =
+        `<div class="error">
+          Couldn't load this channel.
+        </div>`;
+
+    }
+
+  }
+
+
+  /*
+   * RENDER BLOCKS
+   */
+
+  function renderBlocks(blocks) {
+
+    const container =
+      document.getElementById("content");
+
+    container.innerHTML = "";
+
+    if (!blocks.length) {
+
+      container.innerHTML =
+        `<div class="empty">
+          This channel is empty.
+        </div>`;
+
+      return;
+
+    }
+
+
+    blocks.forEach(block => {
+
+      const element =
+        createBlock(block);
+
+      if (element) {
+        container.appendChild(element);
+      }
+
+    });
+
+  }
+
+
+  /*
+   * CREATE A BLOCK
+   */
+
+  function createBlock(block) {
+
+    const wrapper =
+      document.createElement("div");
+
+    wrapper.className = "block";
+
+
+    /*
+     * IMAGE
+     */
+
+    if (block.type === "Image") {
+
+      const link =
+        document.createElement("a");
+
+      link.href =
+        block.source?.url ||
+        `https://www.are.na/block/${block.id}`;
+
+      link.target = "_blank";
+      link.rel = "noopener";
+
+      const image =
+        document.createElement("img");
+
+      /*
+       * V3 image blocks expose image
+       * information. Try the common
+       * variants defensively.
+       */
+
+      const imageUrl =
+        block.image?.display?.url ||
+        block.image?.original?.url ||
+        block.image?.url ||
+        block.source?.url;
+
+      if (!imageUrl) {
+        return null;
+      }
+
+      image.src = imageUrl;
+      image.alt =
+        block.title ||
+        "";
+
+      image.loading = "lazy";
+
+      link.appendChild(image);
+
+      wrapper.appendChild(link);
+
+
+      /*
+       * Caption
+       */
+
+      if (block.title) {
+
+        const caption =
+          document.createElement("div");
+
+        caption.className =
+          "block-caption";
+
+        caption.textContent =
+          block.title;
+
+        wrapper.appendChild(caption);
+
+      }
+
+      return wrapper;
+
+    }
+
+
+    /*
+     * TEXT
+     */
+
+    if (block.type === "Text") {
+
+      const text =
+        document.createElement("div");
+
+      text.className =
+        "text-block";
+
+      text.textContent =
+        block.content ||
+        block.description?.plain ||
+        "";
+
+      wrapper.appendChild(text);
+
+      return wrapper;
+
+    }
+
+
+    /*
+     * LINK
+     */
+
+    if (block.type === "Link") {
+
+      const link =
+        document.createElement("a");
+
+      link.href =
+        block.source?.url ||
+        block.url ||
+        "#";
+
+      link.target = "_blank";
+      link.rel = "noopener";
+
+      link.className =
+        "link-block";
+
+      const title =
+        document.createElement("div");
+
+      title.className =
+        "link-title";
+
+      title.textContent =
+        block.title ||
+        block.source?.title ||
+        "link";
+
+      link.appendChild(title);
+
+
+      const url =
+        document.createElement("div");
+
+      url.className =
+        "link-url";
+
+      url.textContent =
+        block.source?.url ||
+        block.url ||
+        "";
+
+      link.appendChild(url);
+
+      wrapper.appendChild(link);
+
+      return wrapper;
+
+    }
+
+
+    /*
+     * ATTACHMENTS / EMBEDS
+     *
+     * Show these as a simple link rather
+     * than trying to embed every possible
+     * media format.
+     */
+
+    if (
+      block.type === "Attachment" ||
+      block.type === "Embed"
+    ) {
+
+      const link =
+        document.createElement("a");
+
+      link.href =
+        block.source?.url ||
+        `https://www.are.na/block/${block.id}`;
+
+      link.target = "_blank";
+      link.rel = "noopener";
+
+      link.className =
+        "link-block";
+
+      link.textContent =
+        block.title ||
+        block.type;
+
+      wrapper.appendChild(link);
+
+      return wrapper;
+
+    }
+
+
+    return null;
+
+  }
+
+
+  /*
+   * START
+   */
+
+  loadChannels();
+
+</script>
+
+</body>
+</html>
+
