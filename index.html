@@ -1,85 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>emy</title>
 
+
   <style>
+
     * {
       box-sizing: border-box;
     }
+
 
     html {
       scroll-behavior: smooth;
     }
 
+
     body {
       margin: 0;
-      padding: 0;
+
       background: #fff;
       color: #111;
-      font-family: Arial, Helvetica, sans-serif;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
       font-size: 13px;
       line-height: 1.35;
     }
+
 
     a {
       color: inherit;
       text-decoration: none;
     }
 
-    /* ------------------------------
-       HEADER
-    ------------------------------ */
+
+    /* HEADER */
 
     header {
       position: sticky;
       top: 0;
+
       z-index: 100;
-      background: rgba(255, 255, 255, 0.96);
-      border-bottom: 1px solid #ddd;
+
+      background: rgba(
+        255,
+        255,
+        255,
+        0.96
+      );
+
+      border-bottom:
+        1px solid #ddd;
     }
 
-    .header-top {
+
+    .top {
+      padding:
+        12px 16px 8px;
+
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px 8px;
     }
+
 
     .name {
       font-size: 13px;
-      font-weight: normal;
     }
+
 
     .status {
       color: #999;
       font-size: 11px;
     }
 
-    /* ------------------------------
-       CHANNEL NAVIGATION
-    ------------------------------ */
+
+    /* CHANNEL NAV */
 
     nav {
+
       display: flex;
+
       gap: 16px;
-      padding: 0 16px 12px;
+
+      padding:
+        0 16px 12px;
 
       overflow-x: auto;
+
       white-space: nowrap;
 
       scrollbar-width: none;
     }
 
+
     nav::-webkit-scrollbar {
       display: none;
     }
 
+
     nav button {
+
       border: 0;
+
       padding: 0;
       margin: 0;
 
@@ -88,115 +122,141 @@
       color: #999;
 
       font-family: inherit;
+
       font-size: 13px;
 
       cursor: pointer;
     }
 
+
     nav button:hover,
     nav button.active {
+
       color: #111;
+
     }
 
-    /* ------------------------------
-       MAIN
-    ------------------------------ */
+
+    /* MAIN */
 
     main {
-      padding: 18px 16px 60px;
+
+      padding:
+        18px 16px 60px;
+
     }
 
-    .channel-header {
-      margin-bottom: 20px;
-    }
 
     .channel-title {
-      margin: 0;
+
+      margin:
+        0 0 20px;
+
       font-size: 13px;
+
       font-weight: normal;
+
     }
 
-    .channel-description {
-      max-width: 600px;
-      margin-top: 5px;
-      color: #777;
-    }
 
-    /* ------------------------------
-       GRID
-    ------------------------------ */
+    /* GRID */
 
     .grid {
+
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 20px 16px;
+
+      grid-template-columns:
+        repeat(
+          4,
+          minmax(0, 1fr)
+        );
+
+      gap:
+        20px 16px;
+
       align-items: start;
+
     }
+
+
+    /* BLOCK */
 
     .block {
+
       min-width: 0;
+
     }
 
+
     .block img {
+
       display: block;
+
       width: 100%;
+
       height: auto;
 
       background: #f5f5f5;
 
-      object-fit: contain;
     }
 
-    .block img.loading {
-      min-height: 40px;
-    }
 
-    /* ------------------------------
-       CAPTIONS
-    ------------------------------ */
+    /* CAPTION */
 
     .caption {
+
       margin-top: 6px;
 
       color: #777;
 
       font-size: 11px;
-      line-height: 1.35;
+
     }
 
-    /* ------------------------------
-       TEXT BLOCKS
-    ------------------------------ */
+
+    /* TEXT */
 
     .text-block {
+
       padding: 12px;
 
       background: #f4f4f4;
 
       white-space: pre-wrap;
+
     }
 
-    /* ------------------------------
-       LINK BLOCKS
-    ------------------------------ */
+
+    /* LINKS */
 
     .link-block {
+
       display: block;
 
-      border-top: 1px solid #ccc;
+      border-top:
+        1px solid #ccc;
 
       padding-top: 7px;
+
     }
+
 
     .link-block img {
+
       margin-bottom: 7px;
+
     }
+
 
     .link-title {
+
       font-size: 13px;
+
     }
 
+
     .link-url {
+
       margin-top: 3px;
 
       color: #999;
@@ -204,94 +264,137 @@
       font-size: 11px;
 
       word-break: break-word;
+
     }
 
-    /* ------------------------------
-       LOADING / ERROR
-    ------------------------------ */
+
+    /* MESSAGES */
 
     .message {
+
       padding: 40px 0;
 
       color: #999;
+
     }
 
+
     .load-more {
-      margin: 45px auto 0;
 
       display: block;
 
+      margin:
+        45px auto 0;
+
       border: 0;
+
       background: transparent;
 
       color: #888;
 
       font-family: inherit;
+
       font-size: 12px;
 
       cursor: pointer;
+
     }
+
 
     .load-more:hover {
+
       color: #111;
+
     }
 
-    /* ------------------------------
-       MOBILE
-    ------------------------------ */
 
-    @media (max-width: 800px) {
+    /* MOBILE */
+
+    @media (
+      max-width: 800px
+    ) {
 
       .grid {
+
         grid-template-columns:
-          repeat(3, minmax(0, 1fr));
+          repeat(
+            3,
+            minmax(0, 1fr)
+          );
+
       }
 
     }
 
-    @media (max-width: 550px) {
+
+    @media (
+      max-width: 550px
+    ) {
 
       body {
         font-size: 12px;
       }
 
-      .header-top {
-        padding: 10px 12px 7px;
+
+      .top {
+
+        padding:
+          10px 12px 7px;
+
       }
 
+
       nav {
+
         padding-left: 12px;
         padding-right: 12px;
+
         padding-bottom: 10px;
 
         gap: 13px;
+
       }
+
 
       nav button {
         font-size: 12px;
       }
 
+
       main {
-        padding: 14px 12px 50px;
+
+        padding:
+          14px 12px 50px;
+
       }
 
-      .grid {
-        grid-template-columns:
-          repeat(2, minmax(0, 1fr));
 
-        gap: 16px 10px;
+      .grid {
+
+        grid-template-columns:
+          repeat(
+            2,
+            minmax(0, 1fr)
+          );
+
+        gap:
+          16px 10px;
+
       }
 
     }
 
   </style>
+
 </head>
+
 
 <body>
 
+
 <header>
 
-  <div class="header-top">
+  <div class="top">
 
     <div class="name">
       emy
@@ -304,40 +407,25 @@
 
   </div>
 
-  <nav id="channelNav">
-    <button
-      class="active"
-      data-channel="all"
-    >
-      all
-    </button>
-  </nav>
+
+  <nav id="nav"></nav>
 
 </header>
 
 
 <main>
 
-  <div class="channel-header">
-
-    <h1
-      class="channel-title"
-      id="channelTitle"
-    >
-      all
-    </h1>
-
-    <div
-      class="channel-description"
-      id="channelDescription"
-    ></div>
-
-  </div>
+  <h1
+    class="channel-title"
+    id="title"
+  >
+    all
+  </h1>
 
 
   <div
     class="grid"
-    id="content"
+    id="grid"
   >
 
     <div class="message">
@@ -360,262 +448,307 @@
 
 <script>
 
-  /*
-   * ==========================================
-   * SETTINGS
-   * ==========================================
-   */
 
-  const USER = "emy-fuplg6fvywk";
-
-  const API = "https://api.are.na/v3";
-
-  const PER_PAGE = 50;
+/* ==================================================
+   SETTINGS
+================================================== */
 
 
-  /*
-   * ==========================================
-   * STATE
-   * ==========================================
-   */
-
-  let channels = [];
-
-  let currentChannel = null;
-
-  let currentPage = 1;
-
-  let loading = false;
-
-  let hasMore = false;
+const USER =
+  "emy-fuplg6fvywk";
 
 
-  /*
-   * ==========================================
-   * API
-   * ==========================================
-   */
+const API =
+  "https://api.are.na/v3";
 
-  async function api(url) {
 
-    const response = await fetch(url);
+const PER_PAGE = 50;
 
-    if (!response.ok) {
 
-      throw new Error(
-        `Are.na API returned ${response.status}`
-      );
+/* ==================================================
+   STATE
+================================================== */
 
-    }
 
-    return await response.json();
+let channels = [];
+
+let currentChannel = null;
+
+let currentPage = 1;
+
+let hasMore = false;
+
+let loading = false;
+
+
+/* ==================================================
+   API REQUEST
+================================================== */
+
+
+async function request(url) {
+
+  const response =
+    await fetch(url);
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      "API error " +
+      response.status
+    );
 
   }
 
 
-  /*
-   * ==========================================
-   * GET ALL PAGES FROM A USER
-   *
-   * We use this only for the channel list.
-   * Are.na's user endpoint is paginated.
-   * ==========================================
-   */
+  return response.json();
 
-  async function getUserContents() {
+}
+
+
+/* ==================================================
+   LOAD YOUR CREATED CHANNELS
+================================================== */
+
+
+async function loadChannels() {
+
+  try {
+
+    setStatus("loading…");
+
+
+    /*
+     * Get everything created by you.
+     */
 
     let page = 1;
 
-    let all = [];
+    let everything = [];
+
 
     while (true) {
 
-      const result = await api(
-        `${API}/users/${USER}/contents?page=${page}&per=100`
-      );
+      const result =
+        await request(
+          `${API}/users/${USER}/contents?page=${page}&per=100`
+        );
+
 
       if (result.data) {
-        all.push(...result.data);
+
+        everything.push(
+          ...result.data
+        );
+
       }
+
 
       if (
         !result.meta ||
         !result.meta.has_more_pages
       ) {
+
         break;
+
       }
+
 
       page++;
 
     }
 
-    return all;
 
-  }
+    /*
+     * Keep only Channel objects.
+     */
 
-
-  /*
-   * ==========================================
-   * LOAD CHANNELS
-   * ==========================================
-   */
-
-  async function loadChannels() {
-
-    setStatus("loading…");
-
-    try {
-
-      const contents =
-        await getUserContents();
-
-      /*
-       * Only channels created/owned by you.
-       *
-       * We intentionally ignore:
-       *
-       * - channels you collaborate on
-       * - channels created by other users
-       */
-
-      channels =
-        contents.filter(
-          item =>
-            item.type === "Channel"
-        );
+    channels =
+      everything.filter(
+        item =>
+          item.type === "Channel"
+      );
 
 
-      /*
-       * Remove duplicates.
-       */
+    /*
+     * Remove duplicates.
+     */
 
-      const seen = new Set();
+    const ids =
+      new Set();
 
-      channels =
-        channels.filter(channel => {
 
-          if (seen.has(channel.id)) {
+    channels =
+      channels.filter(
+        channel => {
+
+          if (
+            ids.has(channel.id)
+          ) {
+
             return false;
+
           }
 
-          seen.add(channel.id);
+
+          ids.add(channel.id);
 
           return true;
 
-        });
-
-
-      /*
-       * Alphabetical navigation.
-       */
-
-      channels.sort(
-        (a, b) =>
-          a.title.localeCompare(b.title)
+        }
       );
 
 
-      buildNavigation();
+    /*
+     * Alphabetical order.
+     */
 
-      setStatus("");
+    channels.sort(
+      (a, b) =>
+        a.title.localeCompare(
+          b.title
+        )
+    );
 
-      showAll();
 
-    } catch (error) {
+    buildNav();
 
-      console.error(error);
 
-      setStatus("");
+    setStatus("");
 
-      showError(
-        "Couldn't load your Are.na channels."
-      );
 
-    }
+    /*
+     * Start with ALL.
+     */
+
+    showAll();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    setStatus("");
+
+    showError(
+      "Couldn't load your channels."
+    );
 
   }
 
+}
+
+
+/* ==================================================
+   BUILD NAVIGATION
+================================================== */
+
+
+function buildNav() {
+
+  const nav =
+    document.getElementById(
+      "nav"
+    );
+
+
+  nav.innerHTML = "";
+
 
   /*
-   * ==========================================
-   * NAVIGATION
-   * ==========================================
+   * ALL
    */
 
-  function buildNavigation() {
-
-    const nav =
-      document.getElementById(
-        "channelNav"
-      );
-
-    nav.innerHTML = "";
+  const all =
+    document.createElement(
+      "button"
+    );
 
 
-    /*
-     * ALL
-     */
-
-    const all =
-      document.createElement("button");
-
-    all.textContent = "all";
-
-    all.dataset.channel = "all";
-
-    all.classList.add("active");
-
-    all.onclick = showAll;
-
-    nav.appendChild(all);
+  all.textContent =
+    "all";
 
 
-    /*
-     * CHANNELS
-     */
+  all.dataset.id =
+    "all";
 
-    channels.forEach(channel => {
+
+  all.classList.add(
+    "active"
+  );
+
+
+  all.onclick =
+    showAll;
+
+
+  nav.appendChild(all);
+
+
+  /*
+   * CHANNELS
+   */
+
+  channels.forEach(
+    channel => {
 
       const button =
-        document.createElement("button");
+        document.createElement(
+          "button"
+        );
+
 
       button.textContent =
         channel.title;
 
-      button.dataset.channel =
+
+      button.dataset.id =
         channel.id;
 
-      button.onclick = () =>
-        showChannel(channel);
 
-      nav.appendChild(button);
-
-    });
-
-  }
+      button.onclick =
+        () =>
+          showChannel(
+            channel
+          );
 
 
-  /*
-   * ==========================================
-   * ACTIVE NAV ITEM
-   * ==========================================
-   */
+      nav.appendChild(
+        button
+      );
 
-  function setActive(id) {
+    }
+  );
 
-    document
-      .querySelectorAll(
-        "#channelNav button"
-      )
-      .forEach(button => {
+}
+
+
+/* ==================================================
+   ACTIVE NAVIGATION
+================================================== */
+
+
+function setActive(id) {
+
+  document
+    .querySelectorAll(
+      "#nav button"
+    )
+    .forEach(
+      button => {
 
         button.classList.remove(
           "active"
         );
 
+
         if (
-          String(button.dataset.channel)
-          === String(id)
+          String(
+            button.dataset.id
+          )
+          ===
+          String(id)
         ) {
 
           button.classList.add(
@@ -624,105 +757,81 @@
 
         }
 
-      });
+      }
+    );
 
-  }
-
-
-  /*
-   * ==========================================
-   * RESET CONTENT
-   * ==========================================
-   */
-
-  function resetContent() {
-
-    document.getElementById(
-      "content"
-    ).innerHTML = "";
-
-    currentPage = 1;
-
-    hasMore = false;
-
-  }
+}
 
 
-  /*
-   * ==========================================
-   * SHOW ALL
-   *
-   * The ALL view displays blocks from
-   * your personally created channels.
-   *
-   * It loads the first page of each channel,
-   * rather than downloading everything.
-   * ==========================================
-   */
+/* ==================================================
+   SHOW ALL
+================================================== */
 
-  async function showAll() {
 
-    currentChannel = null;
+async function showAll() {
 
-    setActive("all");
+  currentChannel =
+    null;
 
-    resetContent();
 
-    document.getElementById(
-      "channelTitle"
-    ).textContent = "all";
+  setActive("all");
 
-    document.getElementById(
-      "channelDescription"
-    ).textContent = "";
 
-    hideLoadMore();
+  reset();
 
-    showLoading();
 
-    try {
+  document.getElementById(
+    "title"
+  ).textContent =
+    "all";
 
-      /*
-       * Fetch the first page of every
-       * channel simultaneously.
-       */
 
-      const responses =
-        await Promise.all(
+  showLoading();
 
-          channels.map(channel =>
-            api(
-              `${API}/channels/${channel.id}/contents?page=1&per=${PER_PAGE}&sort=position`
+
+  try {
+
+    /*
+     * Get the first 50 blocks
+     * from each channel.
+     */
+
+    const results =
+      await Promise.all(
+
+        channels.map(
+          channel =>
+
+            request(
+              `${API}/channels/${channel.id}/contents?page=1&per=${PER_PAGE}`
             )
-          )
 
-        );
+        )
 
-
-      let blocks = [];
+      );
 
 
-      responses.forEach(
-        (result, index) => {
-
-          const channel =
-            channels[index];
+    let blocks = [];
 
 
-          if (!result.data) {
-            return;
-          }
+    results.forEach(
+      (result, index) => {
+
+        const channel =
+          channels[index];
 
 
-          result.data.forEach(block => {
+        if (!result.data) {
+          return;
+        }
 
-            /*
-             * Don't show nested channels
-             * inside ALL.
-             */
+
+        result.data.forEach(
+          block => {
 
             if (
-              block.type !== "Channel"
+              block.type !==
+              "Channel"
             ) {
 
               blocks.push({
@@ -730,876 +839,938 @@
                 ...block,
 
                 sourceChannel:
-                  channel.title,
-
-                sourceChannelId:
-                  channel.id
+                  channel.title
 
               });
 
             }
 
-          });
-
-        }
-      );
-
-
-      clearLoading();
-
-      if (!blocks.length) {
-
-        showEmpty(
-          "No content yet."
-        );
-
-        return;
-
-      }
-
-
-      renderBlocks(blocks);
-
-    } catch (error) {
-
-      console.error(error);
-
-      showError(
-        "Couldn't load your content."
-      );
-
-    }
-
-  }
-
-
-  /*
-   * ==========================================
-   * SHOW CHANNEL
-   * ==========================================
-   */
-
-  async function showChannel(channel) {
-
-    currentChannel = channel;
-
-    currentPage = 1;
-
-    setActive(channel.id);
-
-    resetContent();
-
-    document.getElementById(
-      "channelTitle"
-    ).textContent =
-      channel.title;
-
-
-    /*
-     * Description
-     */
-
-    const description =
-      channel.description?.plain ||
-      "";
-
-    document.getElementById(
-      "channelDescription"
-    ).textContent =
-      description;
-
-
-    showLoading();
-
-
-    try {
-
-      await loadChannelPage(
-        channel,
-        1,
-        true
-      );
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-
-    } catch (error) {
-
-      console.error(error);
-
-      showError(
-        "Couldn't load this channel."
-      );
-
-    }
-
-  }
-
-
-  /*
-   * ==========================================
-   * LOAD CHANNEL PAGE
-   * ==========================================
-   */
-
-  async function loadChannelPage(
-    channel,
-    page,
-    replace = false
-  ) {
-
-    if (loading) {
-      return;
-    }
-
-    loading = true;
-
-
-    try {
-
-      const result =
-        await api(
-          `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}&sort=position`
-        );
-
-
-      const blocks =
-        result.data || [];
-
-
-      if (replace) {
-        clearLoading();
-      }
-
-
-      renderBlocks(
-        blocks,
-        replace
-      );
-
-
-      /*
-       * Pagination info from V3.
-       */
-
-      hasMore =
-        result.meta?.has_more_pages ||
-        false;
-
-      currentPage =
-        result.meta?.current_page ||
-        page;
-
-
-      if (hasMore) {
-        showLoadMore();
-      } else {
-        hideLoadMore();
-      }
-
-
-    } finally {
-
-      loading = false;
-
-    }
-
-  }
-
-
-  /*
-   * ==========================================
-   * LOAD MORE
-   * ==========================================
-   */
-
-  document
-    .getElementById("loadMore")
-    .addEventListener(
-      "click",
-      async () => {
-
-        if (
-          !currentChannel ||
-          !hasMore ||
-          loading
-        ) {
-          return;
-        }
-
-
-        const nextPage =
-          currentPage + 1;
-
-
-        const button =
-          document.getElementById(
-            "loadMore"
-          );
-
-        button.textContent =
-          "loading…";
-
-
-        try {
-
-          await loadChannelPage(
-            currentChannel,
-            nextPage,
-            false
-          );
-
-        } finally {
-
-          if (hasMore) {
-            button.textContent =
-              "load more";
           }
-
-        }
+        );
 
       }
     );
 
 
-  /*
-   * ==========================================
-   * RENDER BLOCKS
-   * ==========================================
-   */
+    clearLoading();
 
-  function renderBlocks(
-    blocks,
-    replace = false
-  ) {
 
-    const container =
-      document.getElementById(
-        "content"
-      );
+    render(
+      blocks,
+      true
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "ALL ERROR:",
+      error
+    );
+
+
+    showError(
+      "Couldn't load your content."
+    );
+
+  }
+
+}
+
+
+/* ==================================================
+   SHOW CHANNEL
+================================================== */
+
+
+async function showChannel(
+  channel
+) {
+
+  currentChannel =
+    channel;
+
+
+  currentPage =
+    1;
+
+
+  setActive(
+    channel.id
+  );
+
+
+  reset();
+
+
+  document.getElementById(
+    "title"
+  ).textContent =
+    channel.title;
+
+
+  showLoading();
+
+
+  try {
+
+    await loadChannelPage(
+      channel,
+      1,
+      true
+    );
+
+
+    window.scrollTo(
+      {
+        top: 0,
+        behavior: "smooth"
+      }
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "CHANNEL ERROR:",
+      error
+    );
+
+
+    showError(
+      "Couldn't load this channel."
+    );
+
+  }
+
+}
+
+
+/* ==================================================
+   LOAD CHANNEL CONTENT
+================================================== */
+
+
+async function loadChannelPage(
+  channel,
+  page,
+  replace
+) {
+
+  if (loading) {
+    return;
+  }
+
+
+  loading = true;
+
+
+  try {
+
+    const url =
+      `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`;
+
+
+    console.log(
+      "Loading:",
+      url
+    );
+
+
+    const result =
+      await request(url);
+
+
+    console.log(
+      "Channel response:",
+      result
+    );
+
+
+    const blocks =
+      result.data || [];
 
 
     if (replace) {
-      container.innerHTML = "";
+
+      clearLoading();
+
     }
 
 
-    blocks.forEach(block => {
+    render(
+      blocks,
+      replace
+    );
 
-      const element =
-        createBlock(block);
 
-      if (element) {
-        container.appendChild(
-          element
-        );
-      }
+    hasMore =
+      result.meta?.has_more_pages
+      || false;
 
-    });
+
+    currentPage =
+      result.meta?.current_page
+      || page;
+
+
+    updateLoadMore();
+
+
+  } finally {
+
+    loading = false;
+
+  }
+
+}
+
+
+/* ==================================================
+   LOAD MORE
+================================================== */
+
+
+document
+  .getElementById(
+    "loadMore"
+  )
+  .onclick =
+  async function() {
+
+    if (
+      !currentChannel ||
+      !hasMore ||
+      loading
+    ) {
+
+      return;
+
+    }
+
+
+    this.textContent =
+      "loading…";
+
+
+    await loadChannelPage(
+      currentChannel,
+      currentPage + 1,
+      false
+    );
+
+
+    if (hasMore) {
+
+      this.textContent =
+        "load more";
+
+    }
+
+  };
+
+
+/* ==================================================
+   RENDER
+================================================== */
+
+
+function render(
+  blocks,
+  replace = false
+) {
+
+  const grid =
+    document.getElementById(
+      "grid"
+    );
+
+
+  if (replace) {
+
+    grid.innerHTML =
+      "";
 
   }
 
 
-  /*
-   * ==========================================
-   * CREATE BLOCK
-   * ==========================================
-   */
+  blocks.forEach(
+    block => {
 
-  function createBlock(block) {
+      const element =
+        createBlock(
+          block
+        );
 
-    const wrapper =
-      document.createElement("div");
 
-    wrapper.className =
-      "block";
+      if (element) {
+
+        grid.appendChild(
+          element
+        );
+
+      }
+
+    }
+  );
+
+
+  if (
+    replace &&
+    !blocks.length
+  ) {
+
+    grid.innerHTML =
+      `<div class="message">
+        This channel is empty.
+      </div>`;
+
+  }
+
+}
+
+
+/* ==================================================
+   CREATE BLOCK
+================================================== */
+
+
+function createBlock(
+  block
+) {
+
+  const wrapper =
+    document.createElement(
+      "div"
+    );
+
+
+  wrapper.className =
+    "block";
+
+
+  /* -----------------------------------------------
+     IMAGE
+  ------------------------------------------------ */
+
+  if (
+    block.type ===
+    "Image"
+  ) {
+
+    /*
+     * THIS MATCHES THE
+     * ACTUAL API RESPONSE
+     * YOU SENT ME.
+     */
+
+    const imageUrl =
+      block.image?.large?.src ||
+      block.image?.medium?.src ||
+      block.image?.small?.src ||
+      block.image?.src;
+
+
+    if (!imageUrl) {
+
+      console.warn(
+        "Image without URL:",
+        block
+      );
+
+      return null;
+
+    }
+
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.href =
+      `https://www.are.na/block/${block.id}`;
+
+
+    link.target =
+      "_blank";
+
+
+    link.rel =
+      "noopener noreferrer";
+
+
+    const image =
+      document.createElement(
+        "img"
+      );
+
+
+    image.src =
+      imageUrl;
+
+
+    image.alt =
+      block.title ||
+      block.image?.alt_text ||
+      "";
+
+
+    image.loading =
+      "lazy";
 
 
     /*
-     * ----------------------------------------
-     * IMAGE
-     * ----------------------------------------
+     * If a specific image
+     * can't load, don't break
+     * the rest of the page.
      */
 
-    if (
-      block.type === "Image"
-    ) {
+    image.onerror =
+      function() {
 
-      const imageUrl =
-        getImageUrl(block);
+        console.warn(
+          "Image failed:",
+          imageUrl
+        );
 
+        wrapper.remove();
 
-      /*
-       * If there's no usable image URL,
-       * don't make an empty grid item.
-       */
-
-      if (!imageUrl) {
-        return null;
-      }
+      };
 
 
-      const link =
-        document.createElement("a");
+    link.appendChild(
+      image
+    );
 
-      link.href =
-        getBlockUrl(block);
 
-      link.target = "_blank";
+    wrapper.appendChild(
+      link
+    );
 
-      link.rel =
-        "noopener noreferrer";
 
+    if (block.title) {
+
+      const caption =
+        document.createElement(
+          "div"
+        );
+
+
+      caption.className =
+        "caption";
+
+
+      caption.textContent =
+        block.title;
+
+
+      wrapper.appendChild(
+        caption
+      );
+
+    }
+
+
+    return wrapper;
+
+  }
+
+
+  /* -----------------------------------------------
+     TEXT
+  ------------------------------------------------ */
+
+  if (
+    block.type ===
+    "Text"
+  ) {
+
+    const text =
+      document.createElement(
+        "div"
+      );
+
+
+    text.className =
+      "text-block";
+
+
+    text.textContent =
+      block.content?.plain ||
+      "";
+
+
+    wrapper.appendChild(
+      text
+    );
+
+
+    return wrapper;
+
+  }
+
+
+  /* -----------------------------------------------
+     LINK
+  ------------------------------------------------ */
+
+  if (
+    block.type ===
+    "Link"
+  ) {
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.className =
+      "link-block";
+
+
+    link.href =
+      block.url ||
+      block.source?.url ||
+      `https://www.are.na/block/${block.id}`;
+
+
+    link.target =
+      "_blank";
+
+
+    link.rel =
+      "noopener noreferrer";
+
+
+    /*
+     * Link preview image.
+     */
+
+    const imageUrl =
+      block.image?.large?.src ||
+      block.image?.medium?.src ||
+      block.image?.small?.src ||
+      block.image?.src;
+
+
+    if (imageUrl) {
 
       const image =
-        document.createElement("img");
+        document.createElement(
+          "img"
+        );
+
 
       image.src =
         imageUrl;
 
-      image.alt =
-        block.title ||
-        block.image?.alt_text ||
-        "";
 
       image.loading =
         "lazy";
 
 
-      /*
-       * If one image fails, hide only
-       * that particular block.
-       */
-
       image.onerror =
-        () => {
+        function() {
 
-          wrapper.style.display =
+          image.style.display =
             "none";
 
         };
 
 
-      link.appendChild(image);
-
-      wrapper.appendChild(link);
-
-
-      if (block.title) {
-
-        const caption =
-          document.createElement(
-            "div"
-          );
-
-        caption.className =
-          "caption";
-
-        caption.textContent =
-          block.title;
-
-        wrapper.appendChild(
-          caption
-        );
-
-      }
-
-
-      return wrapper;
-
-    }
-
-
-    /*
-     * ----------------------------------------
-     * TEXT
-     * ----------------------------------------
-     */
-
-    if (
-      block.type === "Text"
-    ) {
-
-      const text =
-        document.createElement(
-          "div"
-        );
-
-      text.className =
-        "text-block";
-
-
-      /*
-       * V3 Text blocks expose markdown
-       * content with a plain representation.
-       */
-
-      text.textContent =
-        block.content?.plain ||
-        "";
-
-
-      wrapper.appendChild(text);
-
-      return wrapper;
-
-    }
-
-
-    /*
-     * ----------------------------------------
-     * LINK
-     * ----------------------------------------
-     */
-
-    if (
-      block.type === "Link"
-    ) {
-
-      const link =
-        document.createElement(
-          "a"
-        );
-
-      link.className =
-        "link-block";
-
-      link.href =
-        getBlockExternalUrl(
-          block
-        );
-
-      link.target = "_blank";
-
-      link.rel =
-        "noopener noreferrer";
-
-
-      /*
-       * Link preview image.
-       */
-
-      const imageUrl =
-        getImageUrl(block);
-
-
-      if (imageUrl) {
-
-        const image =
-          document.createElement(
-            "img"
-          );
-
-        image.src =
-          imageUrl;
-
-        image.alt =
-          block.title || "";
-
-        image.loading =
-          "lazy";
-
-
-        image.onerror =
-          () => {
-
-            image.style.display =
-              "none";
-
-          };
-
-
-        link.appendChild(image);
-
-      }
-
-
-      const title =
-        document.createElement(
-          "div"
-        );
-
-      title.className =
-        "link-title";
-
-      title.textContent =
-        block.title ||
-        block.source?.title ||
-        block.url ||
-        "link";
-
-
-      link.appendChild(title);
-
-
-      const url =
-        document.createElement(
-          "div"
-        );
-
-      url.className =
-        "link-url";
-
-      url.textContent =
-        block.url ||
-        block.source?.url ||
-        "";
-
-
-      link.appendChild(url);
-
-      wrapper.appendChild(link);
-
-      return wrapper;
-
-    }
-
-
-    /*
-     * ----------------------------------------
-     * ATTACHMENT
-     * ----------------------------------------
-     */
-
-    if (
-      block.type === "Attachment"
-    ) {
-
-      const link =
-        document.createElement(
-          "a"
-        );
-
-      link.className =
-        "link-block";
-
-      link.href =
-        block.url ||
-        getBlockUrl(block);
-
-      link.target = "_blank";
-
-      link.rel =
-        "noopener noreferrer";
-
-
-      const imageUrl =
-        getImageUrl(block);
-
-
-      if (imageUrl) {
-
-        const image =
-          document.createElement(
-            "img"
-          );
-
-        image.src =
-          imageUrl;
-
-        image.loading =
-          "lazy";
-
-        image.onerror =
-          () => {
-
-            image.style.display =
-              "none";
-
-          };
-
-
-        link.appendChild(image);
-
-      }
-
-
-      const title =
-        document.createElement(
-          "div"
-        );
-
-      title.className =
-        "link-title";
-
-      title.textContent =
-        block.title ||
-        block.filename ||
-        "attachment";
-
-
-      link.appendChild(title);
-
-      wrapper.appendChild(link);
-
-      return wrapper;
-
-    }
-
-
-    /*
-     * ----------------------------------------
-     * EMBED
-     * ----------------------------------------
-     */
-
-    if (
-      block.type === "Embed"
-    ) {
-
-      const link =
-        document.createElement(
-          "a"
-        );
-
-      link.className =
-        "link-block";
-
-      link.href =
-        block.embed?.source_url ||
-        block.source?.url ||
-        getBlockUrl(block);
-
-      link.target = "_blank";
-
-      link.rel =
-        "noopener noreferrer";
-
-
-      const imageUrl =
-        getImageUrl(block);
-
-
-      if (imageUrl) {
-
-        const image =
-          document.createElement(
-            "img"
-          );
-
-        image.src =
-          imageUrl;
-
-        image.loading =
-          "lazy";
-
-        image.onerror =
-          () => {
-
-            image.style.display =
-              "none";
-
-          };
-
-
-        link.appendChild(image);
-
-      }
-
-
-      const title =
-        document.createElement(
-          "div"
-        );
-
-      title.className =
-        "link-title";
-
-      title.textContent =
-        block.title ||
-        block.embed?.title ||
-        "embed";
-
-
-      link.appendChild(title);
-
-      wrapper.appendChild(link);
-
-      return wrapper;
-
-    }
-
-
-    return null;
-
-  }
-
-
-  /*
-   * ==========================================
-   * IMAGE URL
-   *
-   * V3 image representations use src.
-   *
-   * We try the larger versions first.
-   * ==========================================
-   */
-
-  function getImageUrl(block) {
-
-    const image =
-      block.image;
-
-
-    if (!image) {
-      return null;
-    }
-
-
-    return (
-      image.large?.src ||
-      image.medium?.src ||
-      image.small?.src ||
-      image.src ||
-      null
-    );
-
-  }
-
-
-  /*
-   * ==========================================
-   * BLOCK URL
-   * ==========================================
-   */
-
-  function getBlockUrl(block) {
-
-    if (
-      block._links?.self?.href
-    ) {
-
-      return block
-        ._links
-        .self
-        .href;
-
-    }
-
-
-    return (
-      `https://www.are.na/block/${block.id}`
-    );
-
-  }
-
-
-  /*
-   * ==========================================
-   * EXTERNAL URL
-   * ==========================================
-   */
-
-  function getBlockExternalUrl(
-    block
-  ) {
-
-    return (
-      block.url ||
-      block.source?.url ||
-      getBlockUrl(block)
-    );
-
-  }
-
-
-  /*
-   * ==========================================
-   * UI HELPERS
-   * ==========================================
-   */
-
-  function showLoading() {
-
-    document.getElementById(
-      "content"
-    ).innerHTML =
-      `<div class="message">
-        loading…
-      </div>`;
-
-  }
-
-
-  function clearLoading() {
-
-    const message =
-      document.querySelector(
-        ".message"
+      link.appendChild(
+        image
       );
 
-    if (message) {
-      message.remove();
     }
 
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+
+    title.className =
+      "link-title";
+
+
+    title.textContent =
+      block.title ||
+      block.source?.title ||
+      "link";
+
+
+    link.appendChild(
+      title
+    );
+
+
+    const url =
+      document.createElement(
+        "div"
+      );
+
+
+    url.className =
+      "link-url";
+
+
+    url.textContent =
+      block.url ||
+      block.source?.url ||
+      "";
+
+
+    link.appendChild(
+      url
+    );
+
+
+    wrapper.appendChild(
+      link
+    );
+
+
+    return wrapper;
+
   }
 
 
-  function showEmpty(text) {
+  /* -----------------------------------------------
+     ATTACHMENT
+  ------------------------------------------------ */
 
-    document.getElementById(
-      "content"
-    ).innerHTML =
-      `<div class="message">
-        ${text}
-      </div>`;
+  if (
+    block.type ===
+    "Attachment"
+  ) {
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.className =
+      "link-block";
+
+
+    link.href =
+      block.url ||
+      `https://www.are.na/block/${block.id}`;
+
+
+    link.target =
+      "_blank";
+
+
+    link.rel =
+      "noopener noreferrer";
+
+
+    const imageUrl =
+      block.image?.large?.src ||
+      block.image?.medium?.src ||
+      block.image?.small?.src ||
+      block.image?.src;
+
+
+    if (imageUrl) {
+
+      const image =
+        document.createElement(
+          "img"
+        );
+
+
+      image.src =
+        imageUrl;
+
+
+      image.loading =
+        "lazy";
+
+
+      link.appendChild(
+        image
+      );
+
+    }
+
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+
+    title.className =
+      "link-title";
+
+
+    title.textContent =
+      block.title ||
+      block.filename ||
+      "attachment";
+
+
+    link.appendChild(
+      title
+    );
+
+
+    wrapper.appendChild(
+      link
+    );
+
+
+    return wrapper;
 
   }
 
 
-  function showError(text) {
+  /* -----------------------------------------------
+     EMBED
+  ------------------------------------------------ */
 
-    document.getElementById(
-      "content"
-    ).innerHTML =
-      `<div class="message">
-        ${text}
-      </div>`;
+  if (
+    block.type ===
+    "Embed"
+  ) {
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.className =
+      "link-block";
+
+
+    link.href =
+      block.embed?.source_url ||
+      block.source?.url ||
+      `https://www.are.na/block/${block.id}`;
+
+
+    link.target =
+      "_blank";
+
+
+    link.rel =
+      "noopener noreferrer";
+
+
+    const imageUrl =
+      block.image?.large?.src ||
+      block.image?.medium?.src ||
+      block.image?.small?.src ||
+      block.image?.src;
+
+
+    if (imageUrl) {
+
+      const image =
+        document.createElement(
+          "img"
+        );
+
+
+      image.src =
+        imageUrl;
+
+
+      image.loading =
+        "lazy";
+
+
+      link.appendChild(
+        image
+      );
+
+    }
+
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+
+    title.className =
+      "link-title";
+
+
+    title.textContent =
+      block.title ||
+      "embed";
+
+
+    link.appendChild(
+      title
+    );
+
+
+    wrapper.appendChild(
+      link
+    );
+
+
+    return wrapper;
 
   }
 
 
-  function showLoadMore() {
+  return null;
 
+}
+
+
+/* ==================================================
+   RESET
+================================================== */
+
+
+function reset() {
+
+  document.getElementById(
+    "grid"
+  ).innerHTML =
+    "";
+
+
+  document.getElementById(
+    "loadMore"
+  ).style.display =
+    "none";
+
+
+  currentPage =
+    1;
+
+
+  hasMore =
+    false;
+
+}
+
+
+/* ==================================================
+   LOADING
+================================================== */
+
+
+function showLoading() {
+
+  document.getElementById(
+    "grid"
+  ).innerHTML =
+    `<div class="message">
+      loading…
+    </div>`;
+
+}
+
+
+function clearLoading() {
+
+  const message =
+    document.querySelector(
+      ".message"
+    );
+
+
+  if (message) {
+
+    message.remove();
+
+  }
+
+}
+
+
+/* ==================================================
+   ERROR
+================================================== */
+
+
+function showError(
+  message
+) {
+
+  document.getElementById(
+    "grid"
+  ).innerHTML =
+    `<div class="message">
+      ${message}
+    </div>`;
+
+}
+
+
+/* ==================================================
+   LOAD MORE UI
+================================================== */
+
+
+function updateLoadMore() {
+
+  const button =
     document.getElementById(
       "loadMore"
-    ).style.display =
+    );
+
+
+  if (
+    currentChannel &&
+    hasMore
+  ) {
+
+    button.style.display =
       "block";
 
-  }
+  } else {
 
-
-  function hideLoadMore() {
-
-    document.getElementById(
-      "loadMore"
-    ).style.display =
+    button.style.display =
       "none";
 
   }
 
-
-  function setStatus(text) {
-
-    document.getElementById(
-      "status"
-    ).textContent =
-      text;
-
-  }
+}
 
 
-  /*
-   * ==========================================
-   * START
-   * ==========================================
-   */
+/* ==================================================
+   STATUS
+================================================== */
 
-  loadChannels();
+
+function setStatus(
+  text
+) {
+
+  document.getElementById(
+    "status"
+  ).textContent =
+    text;
+
+}
+
+
+/* ==================================================
+   START
+================================================== */
+
+
+loadChannels();
+
 
 </script>
 
 </body>
+
 </html>
