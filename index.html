@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>emy — are.na</title>
+  <title>emy</title>
 
   <style>
     * {
@@ -30,39 +30,44 @@
       text-decoration: none;
     }
 
-    /* HEADER */
+    /* ------------------------------
+       HEADER
+    ------------------------------ */
 
     header {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: white;
+      background: rgba(255, 255, 255, 0.96);
       border-bottom: 1px solid #ddd;
     }
 
-    .top {
+    .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 16px;
+      padding: 12px 16px 8px;
     }
 
     .name {
-      font-weight: 500;
-      text-transform: lowercase;
+      font-size: 13px;
+      font-weight: normal;
     }
 
-    .back {
-      display: none;
-      cursor: pointer;
+    .status {
+      color: #999;
+      font-size: 11px;
     }
 
-    /* CHANNEL NAVIGATION */
+    /* ------------------------------
+       CHANNEL NAVIGATION
+    ------------------------------ */
 
     nav {
       display: flex;
-      gap: 18px;
+      gap: 16px;
       padding: 0 16px 12px;
+
       overflow-x: auto;
       white-space: nowrap;
 
@@ -74,14 +79,17 @@
     }
 
     nav button {
-      appearance: none;
       border: 0;
       padding: 0;
       margin: 0;
+
       background: transparent;
 
-      font: inherit;
-      color: #888;
+      color: #999;
+
+      font-family: inherit;
+      font-size: 13px;
+
       cursor: pointer;
     }
 
@@ -90,26 +98,40 @@
       color: #111;
     }
 
-    /* CONTENT */
+    /* ------------------------------
+       MAIN
+    ------------------------------ */
 
     main {
-      padding: 16px;
+      padding: 18px 16px 60px;
+    }
+
+    .channel-header {
+      margin-bottom: 20px;
     }
 
     .channel-title {
-      margin: 0 0 20px;
+      margin: 0;
       font-size: 13px;
       font-weight: normal;
     }
 
+    .channel-description {
+      max-width: 600px;
+      margin-top: 5px;
+      color: #777;
+    }
+
+    /* ------------------------------
+       GRID
+    ------------------------------ */
+
     .grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
+      gap: 20px 16px;
       align-items: start;
     }
-
-    /* BLOCKS */
 
     .block {
       min-width: 0;
@@ -119,138 +141,259 @@
       display: block;
       width: 100%;
       height: auto;
-      background: #f3f3f3;
+
+      background: #f5f5f5;
+
+      object-fit: contain;
     }
 
-    .block-caption {
-      margin-top: 7px;
-      color: #777;
-      font-size: 12px;
+    .block img.loading {
+      min-height: 40px;
     }
+
+    /* ------------------------------
+       CAPTIONS
+    ------------------------------ */
+
+    .caption {
+      margin-top: 6px;
+
+      color: #777;
+
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    /* ------------------------------
+       TEXT BLOCKS
+    ------------------------------ */
 
     .text-block {
       padding: 12px;
-      background: #f3f3f3;
-      min-height: 80px;
+
+      background: #f4f4f4;
+
+      white-space: pre-wrap;
     }
 
+    /* ------------------------------
+       LINK BLOCKS
+    ------------------------------ */
+
     .link-block {
+      display: block;
+
       border-top: 1px solid #ccc;
-      padding-top: 8px;
+
+      padding-top: 7px;
+    }
+
+    .link-block img {
+      margin-bottom: 7px;
     }
 
     .link-title {
-      margin-bottom: 4px;
+      font-size: 13px;
     }
 
     .link-url {
-      color: #888;
-      word-break: break-word;
+      margin-top: 3px;
+
+      color: #999;
+
       font-size: 11px;
+
+      word-break: break-word;
     }
 
-    .loading,
-    .error,
-    .empty {
+    /* ------------------------------
+       LOADING / ERROR
+    ------------------------------ */
+
+    .message {
       padding: 40px 0;
-      color: #888;
+
+      color: #999;
     }
 
-    /* RESPONSIVE */
+    .load-more {
+      margin: 45px auto 0;
+
+      display: block;
+
+      border: 0;
+      background: transparent;
+
+      color: #888;
+
+      font-family: inherit;
+      font-size: 12px;
+
+      cursor: pointer;
+    }
+
+    .load-more:hover {
+      color: #111;
+    }
+
+    /* ------------------------------
+       MOBILE
+    ------------------------------ */
 
     @media (max-width: 800px) {
+
       .grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns:
+          repeat(3, minmax(0, 1fr));
       }
+
     }
 
     @media (max-width: 550px) {
+
       body {
         font-size: 12px;
       }
 
-      .top {
-        padding: 10px 12px;
+      .header-top {
+        padding: 10px 12px 7px;
       }
 
       nav {
-        padding: 0 12px 10px;
-        gap: 14px;
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 10px;
+
+        gap: 13px;
+      }
+
+      nav button {
+        font-size: 12px;
       }
 
       main {
-        padding: 12px;
+        padding: 14px 12px 50px;
       }
 
       .grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+
+        gap: 16px 10px;
       }
+
     }
+
   </style>
 </head>
 
 <body>
 
 <header>
-  <div class="top">
-    <div class="name">emy</div>
+
+  <div class="header-top">
+
+    <div class="name">
+      emy
+    </div>
 
     <div
-      class="back"
-      id="backButton"
-      onclick="showAll()"
-    >
-      ← all
-    </div>
+      class="status"
+      id="status"
+    ></div>
+
   </div>
 
   <nav id="channelNav">
     <button
       class="active"
       data-channel="all"
-      onclick="showAll()"
     >
       all
     </button>
   </nav>
+
 </header>
+
 
 <main>
 
-  <div id="channelTitle" class="channel-title">
-    all
+  <div class="channel-header">
+
+    <h1
+      class="channel-title"
+      id="channelTitle"
+    >
+      all
+    </h1>
+
+    <div
+      class="channel-description"
+      id="channelDescription"
+    ></div>
+
   </div>
 
-  <div id="content" class="grid">
-    <div class="loading">
+
+  <div
+    class="grid"
+    id="content"
+  >
+
+    <div class="message">
       loading…
     </div>
+
   </div>
 
+
+  <button
+    class="load-more"
+    id="loadMore"
+    style="display:none"
+  >
+    load more
+  </button>
+
 </main>
+
 
 <script>
 
   /*
-   * YOUR ARE.NA USER
+   * ==========================================
+   * SETTINGS
+   * ==========================================
    */
 
   const USER = "emy-fuplg6fvywk";
 
-  /*
-   * ARE.NA V3 API
-   */
-
   const API = "https://api.are.na/v3";
 
-
-  let channels = [];
-  let currentChannel = null;
+  const PER_PAGE = 50;
 
 
   /*
-   * FETCH HELPER
+   * ==========================================
+   * STATE
+   * ==========================================
+   */
+
+  let channels = [];
+
+  let currentChannel = null;
+
+  let currentPage = 1;
+
+  let loading = false;
+
+  let hasMore = false;
+
+
+  /*
+   * ==========================================
+   * API
+   * ==========================================
    */
 
   async function api(url) {
@@ -258,47 +401,123 @@
     const response = await fetch(url);
 
     if (!response.ok) {
+
       throw new Error(
-        "Are.na API error: " + response.status
+        `Are.na API returned ${response.status}`
       );
+
     }
 
-    return response.json();
+    return await response.json();
+
   }
 
 
   /*
-   * LOAD YOUR CHANNELS
+   * ==========================================
+   * GET ALL PAGES FROM A USER
    *
-   * /users/:id/contents returns content created
-   * by the user, including channels.
+   * We use this only for the channel list.
+   * Are.na's user endpoint is paginated.
+   * ==========================================
+   */
+
+  async function getUserContents() {
+
+    let page = 1;
+
+    let all = [];
+
+    while (true) {
+
+      const result = await api(
+        `${API}/users/${USER}/contents?page=${page}&per=100`
+      );
+
+      if (result.data) {
+        all.push(...result.data);
+      }
+
+      if (
+        !result.meta ||
+        !result.meta.has_more_pages
+      ) {
+        break;
+      }
+
+      page++;
+
+    }
+
+    return all;
+
+  }
+
+
+  /*
+   * ==========================================
+   * LOAD CHANNELS
+   * ==========================================
    */
 
   async function loadChannels() {
 
+    setStatus("loading…");
+
     try {
 
-      const result = await api(
-        `${API}/users/${USER}/contents?per=100`
-      );
-
-      channels = result.data.filter(
-        item => item.type === "Channel"
-      );
+      const contents =
+        await getUserContents();
 
       /*
-       * Sort alphabetically.
+       * Only channels created/owned by you.
+       *
+       * We intentionally ignore:
+       *
+       * - channels you collaborate on
+       * - channels created by other users
        */
 
-      channels.sort((a, b) =>
-        a.title.localeCompare(b.title)
+      channels =
+        contents.filter(
+          item =>
+            item.type === "Channel"
+        );
+
+
+      /*
+       * Remove duplicates.
+       */
+
+      const seen = new Set();
+
+      channels =
+        channels.filter(channel => {
+
+          if (seen.has(channel.id)) {
+            return false;
+          }
+
+          seen.add(channel.id);
+
+          return true;
+
+        });
+
+
+      /*
+       * Alphabetical navigation.
+       */
+
+      channels.sort(
+        (a, b) =>
+          a.title.localeCompare(b.title)
       );
+
 
       buildNavigation();
 
-      /*
-       * Start with ALL.
-       */
+      setStatus("");
 
       showAll();
 
@@ -306,10 +525,11 @@
 
       console.error(error);
 
-      document.getElementById("content").innerHTML =
-        `<div class="error">
-          Couldn't load your Are.na channels.
-        </div>`;
+      setStatus("");
+
+      showError(
+        "Couldn't load your Are.na channels."
+      );
 
     }
 
@@ -317,29 +537,37 @@
 
 
   /*
-   * BUILD CHANNEL NAVIGATION
+   * ==========================================
+   * NAVIGATION
+   * ==========================================
    */
 
   function buildNavigation() {
 
     const nav =
-      document.getElementById("channelNav");
+      document.getElementById(
+        "channelNav"
+      );
 
     nav.innerHTML = "";
+
 
     /*
      * ALL
      */
 
-    const allButton =
+    const all =
       document.createElement("button");
 
-    allButton.textContent = "all";
-    allButton.classList.add("active");
+    all.textContent = "all";
 
-    allButton.onclick = showAll;
+    all.dataset.channel = "all";
 
-    nav.appendChild(allButton);
+    all.classList.add("active");
+
+    all.onclick = showAll;
+
+    nav.appendChild(all);
 
 
     /*
@@ -354,11 +582,11 @@
       button.textContent =
         channel.title;
 
+      button.dataset.channel =
+        channel.id;
+
       button.onclick = () =>
         showChannel(channel);
-
-      button.dataset.id =
-        channel.id;
 
       nav.appendChild(button);
 
@@ -368,29 +596,32 @@
 
 
   /*
-   * SET ACTIVE NAV ITEM
+   * ==========================================
+   * ACTIVE NAV ITEM
+   * ==========================================
    */
 
-  function setActive(channelId) {
+  function setActive(id) {
 
     document
-      .querySelectorAll("#channelNav button")
+      .querySelectorAll(
+        "#channelNav button"
+      )
       .forEach(button => {
 
-        button.classList.remove("active");
+        button.classList.remove(
+          "active"
+        );
 
         if (
-          channelId === "all" &&
-          button.textContent === "all"
+          String(button.dataset.channel)
+          === String(id)
         ) {
-          button.classList.add("active");
-        }
 
-        if (
-          String(button.dataset.id) ===
-          String(channelId)
-        ) {
-          button.classList.add("active");
+          button.classList.add(
+            "active"
+          );
+
         }
 
       });
@@ -399,10 +630,34 @@
 
 
   /*
+   * ==========================================
+   * RESET CONTENT
+   * ==========================================
+   */
+
+  function resetContent() {
+
+    document.getElementById(
+      "content"
+    ).innerHTML = "";
+
+    currentPage = 1;
+
+    hasMore = false;
+
+  }
+
+
+  /*
+   * ==========================================
    * SHOW ALL
    *
-   * This combines blocks from all your
-   * personally created channels.
+   * The ALL view displays blocks from
+   * your personally created channels.
+   *
+   * It loads the first page of each channel,
+   * rather than downloading everything.
+   * ==========================================
    */
 
   async function showAll() {
@@ -411,61 +666,97 @@
 
     setActive("all");
 
-    document.getElementById("channelTitle")
-      .textContent = "all";
+    resetContent();
 
-    document.getElementById("backButton")
-      .style.display = "none";
+    document.getElementById(
+      "channelTitle"
+    ).textContent = "all";
 
-    const container =
-      document.getElementById("content");
+    document.getElementById(
+      "channelDescription"
+    ).textContent = "";
 
-    container.innerHTML =
-      `<div class="loading">
-        loading…
-      </div>`;
+    hideLoadMore();
+
+    showLoading();
 
     try {
 
       /*
-       * Fetch all channels simultaneously.
+       * Fetch the first page of every
+       * channel simultaneously.
        */
 
       const responses =
         await Promise.all(
+
           channels.map(channel =>
             api(
-              `${API}/channels/${channel.id}/contents?per=100`
+              `${API}/channels/${channel.id}/contents?page=1&per=${PER_PAGE}&sort=position`
             )
           )
+
         );
+
 
       let blocks = [];
 
-      responses.forEach((result, index) => {
 
-        const channel =
-          channels[index];
+      responses.forEach(
+        (result, index) => {
 
-        result.data.forEach(block => {
+          const channel =
+            channels[index];
 
-          /*
-           * Don't show nested channels in ALL.
-           * We only want the actual content blocks.
-           */
 
-          if (block.type !== "Channel") {
-
-            blocks.push({
-              ...block,
-              sourceChannel: channel.title
-            });
-
+          if (!result.data) {
+            return;
           }
 
-        });
 
-      });
+          result.data.forEach(block => {
+
+            /*
+             * Don't show nested channels
+             * inside ALL.
+             */
+
+            if (
+              block.type !== "Channel"
+            ) {
+
+              blocks.push({
+
+                ...block,
+
+                sourceChannel:
+                  channel.title,
+
+                sourceChannelId:
+                  channel.id
+
+              });
+
+            }
+
+          });
+
+        }
+      );
+
+
+      clearLoading();
+
+      if (!blocks.length) {
+
+        showEmpty(
+          "No content yet."
+        );
+
+        return;
+
+      }
+
 
       renderBlocks(blocks);
 
@@ -473,10 +764,9 @@
 
       console.error(error);
 
-      container.innerHTML =
-        `<div class="error">
-          Couldn't load your content.
-        </div>`;
+      showError(
+        "Couldn't load your content."
+      );
 
     }
 
@@ -484,41 +774,51 @@
 
 
   /*
-   * SHOW ONE CHANNEL
+   * ==========================================
+   * SHOW CHANNEL
+   * ==========================================
    */
 
   async function showChannel(channel) {
 
     currentChannel = channel;
 
+    currentPage = 1;
+
     setActive(channel.id);
 
-    document.getElementById("channelTitle")
-      .textContent = channel.title;
+    resetContent();
 
-    document.getElementById("backButton")
-      .style.display = "block";
+    document.getElementById(
+      "channelTitle"
+    ).textContent =
+      channel.title;
 
-    const container =
-      document.getElementById("content");
 
-    container.innerHTML =
-      `<div class="loading">
-        loading…
-      </div>`;
+    /*
+     * Description
+     */
+
+    const description =
+      channel.description?.plain ||
+      "";
+
+    document.getElementById(
+      "channelDescription"
+    ).textContent =
+      description;
+
+
+    showLoading();
+
 
     try {
 
-      const result =
-        await api(
-          `${API}/channels/${channel.id}/contents?per=100&sort=position`
-        );
-
-      renderBlocks(result.data);
-
-      /*
-       * When clicking a channel, scroll to top.
-       */
+      await loadChannelPage(
+        channel,
+        1,
+        true
+      );
 
       window.scrollTo({
         top: 0,
@@ -529,10 +829,9 @@
 
       console.error(error);
 
-      container.innerHTML =
-        `<div class="error">
-          Couldn't load this channel.
-        </div>`;
+      showError(
+        "Couldn't load this channel."
+      );
 
     }
 
@@ -540,25 +839,150 @@
 
 
   /*
-   * RENDER BLOCKS
+   * ==========================================
+   * LOAD CHANNEL PAGE
+   * ==========================================
    */
 
-  function renderBlocks(blocks) {
+  async function loadChannelPage(
+    channel,
+    page,
+    replace = false
+  ) {
+
+    if (loading) {
+      return;
+    }
+
+    loading = true;
+
+
+    try {
+
+      const result =
+        await api(
+          `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}&sort=position`
+        );
+
+
+      const blocks =
+        result.data || [];
+
+
+      if (replace) {
+        clearLoading();
+      }
+
+
+      renderBlocks(
+        blocks,
+        replace
+      );
+
+
+      /*
+       * Pagination info from V3.
+       */
+
+      hasMore =
+        result.meta?.has_more_pages ||
+        false;
+
+      currentPage =
+        result.meta?.current_page ||
+        page;
+
+
+      if (hasMore) {
+        showLoadMore();
+      } else {
+        hideLoadMore();
+      }
+
+
+    } finally {
+
+      loading = false;
+
+    }
+
+  }
+
+
+  /*
+   * ==========================================
+   * LOAD MORE
+   * ==========================================
+   */
+
+  document
+    .getElementById("loadMore")
+    .addEventListener(
+      "click",
+      async () => {
+
+        if (
+          !currentChannel ||
+          !hasMore ||
+          loading
+        ) {
+          return;
+        }
+
+
+        const nextPage =
+          currentPage + 1;
+
+
+        const button =
+          document.getElementById(
+            "loadMore"
+          );
+
+        button.textContent =
+          "loading…";
+
+
+        try {
+
+          await loadChannelPage(
+            currentChannel,
+            nextPage,
+            false
+          );
+
+        } finally {
+
+          if (hasMore) {
+            button.textContent =
+              "load more";
+          }
+
+        }
+
+      }
+    );
+
+
+  /*
+   * ==========================================
+   * RENDER BLOCKS
+   * ==========================================
+   */
+
+  function renderBlocks(
+    blocks,
+    replace = false
+  ) {
 
     const container =
-      document.getElementById("content");
+      document.getElementById(
+        "content"
+      );
 
-    container.innerHTML = "";
 
-    if (!blocks.length) {
-
-      container.innerHTML =
-        `<div class="empty">
-          This channel is empty.
-        </div>`;
-
-      return;
-
+    if (replace) {
+      container.innerHTML = "";
     }
 
 
@@ -568,7 +992,9 @@
         createBlock(block);
 
       if (element) {
-        container.appendChild(element);
+        container.appendChild(
+          element
+        );
       }
 
     });
@@ -577,7 +1003,9 @@
 
 
   /*
-   * CREATE A BLOCK
+   * ==========================================
+   * CREATE BLOCK
+   * ==========================================
    */
 
   function createBlock(block) {
@@ -585,74 +1013,99 @@
     const wrapper =
       document.createElement("div");
 
-    wrapper.className = "block";
+    wrapper.className =
+      "block";
 
 
     /*
+     * ----------------------------------------
      * IMAGE
+     * ----------------------------------------
      */
 
-    if (block.type === "Image") {
-
-      const link =
-        document.createElement("a");
-
-      link.href =
-        block.source?.url ||
-        `https://www.are.na/block/${block.id}`;
-
-      link.target = "_blank";
-      link.rel = "noopener";
-
-      const image =
-        document.createElement("img");
-
-      /*
-       * V3 image blocks expose image
-       * information. Try the common
-       * variants defensively.
-       */
+    if (
+      block.type === "Image"
+    ) {
 
       const imageUrl =
-        block.image?.display?.url ||
-        block.image?.original?.url ||
-        block.image?.url ||
-        block.source?.url;
+        getImageUrl(block);
+
+
+      /*
+       * If there's no usable image URL,
+       * don't make an empty grid item.
+       */
 
       if (!imageUrl) {
         return null;
       }
 
-      image.src = imageUrl;
+
+      const link =
+        document.createElement("a");
+
+      link.href =
+        getBlockUrl(block);
+
+      link.target = "_blank";
+
+      link.rel =
+        "noopener noreferrer";
+
+
+      const image =
+        document.createElement("img");
+
+      image.src =
+        imageUrl;
+
       image.alt =
         block.title ||
+        block.image?.alt_text ||
         "";
 
-      image.loading = "lazy";
+      image.loading =
+        "lazy";
+
+
+      /*
+       * If one image fails, hide only
+       * that particular block.
+       */
+
+      image.onerror =
+        () => {
+
+          wrapper.style.display =
+            "none";
+
+        };
+
 
       link.appendChild(image);
 
       wrapper.appendChild(link);
 
 
-      /*
-       * Caption
-       */
-
       if (block.title) {
 
         const caption =
-          document.createElement("div");
+          document.createElement(
+            "div"
+          );
 
         caption.className =
-          "block-caption";
+          "caption";
 
         caption.textContent =
           block.title;
 
-        wrapper.appendChild(caption);
+        wrapper.appendChild(
+          caption
+        );
 
       }
+
 
       return wrapper;
 
@@ -660,21 +1113,33 @@
 
 
     /*
+     * ----------------------------------------
      * TEXT
+     * ----------------------------------------
      */
 
-    if (block.type === "Text") {
+    if (
+      block.type === "Text"
+    ) {
 
       const text =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       text.className =
         "text-block";
 
+
+      /*
+       * V3 Text blocks expose markdown
+       * content with a plain representation.
+       */
+
       text.textContent =
-        block.content ||
-        block.description?.plain ||
+        block.content?.plain ||
         "";
+
 
       wrapper.appendChild(text);
 
@@ -684,27 +1149,77 @@
 
 
     /*
+     * ----------------------------------------
      * LINK
+     * ----------------------------------------
      */
 
-    if (block.type === "Link") {
+    if (
+      block.type === "Link"
+    ) {
 
       const link =
-        document.createElement("a");
-
-      link.href =
-        block.source?.url ||
-        block.url ||
-        "#";
-
-      link.target = "_blank";
-      link.rel = "noopener";
+        document.createElement(
+          "a"
+        );
 
       link.className =
         "link-block";
 
+      link.href =
+        getBlockExternalUrl(
+          block
+        );
+
+      link.target = "_blank";
+
+      link.rel =
+        "noopener noreferrer";
+
+
+      /*
+       * Link preview image.
+       */
+
+      const imageUrl =
+        getImageUrl(block);
+
+
+      if (imageUrl) {
+
+        const image =
+          document.createElement(
+            "img"
+          );
+
+        image.src =
+          imageUrl;
+
+        image.alt =
+          block.title || "";
+
+        image.loading =
+          "lazy";
+
+
+        image.onerror =
+          () => {
+
+            image.style.display =
+              "none";
+
+          };
+
+
+        link.appendChild(image);
+
+      }
+
+
       const title =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       title.className =
         "link-title";
@@ -712,21 +1227,26 @@
       title.textContent =
         block.title ||
         block.source?.title ||
+        block.url ||
         "link";
+
 
       link.appendChild(title);
 
 
       const url =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
       url.className =
         "link-url";
 
       url.textContent =
-        block.source?.url ||
         block.url ||
+        block.source?.url ||
         "";
+
 
       link.appendChild(url);
 
@@ -738,34 +1258,162 @@
 
 
     /*
-     * ATTACHMENTS / EMBEDS
-     *
-     * Show these as a simple link rather
-     * than trying to embed every possible
-     * media format.
+     * ----------------------------------------
+     * ATTACHMENT
+     * ----------------------------------------
      */
 
     if (
-      block.type === "Attachment" ||
-      block.type === "Embed"
+      block.type === "Attachment"
     ) {
 
       const link =
-        document.createElement("a");
-
-      link.href =
-        block.source?.url ||
-        `https://www.are.na/block/${block.id}`;
-
-      link.target = "_blank";
-      link.rel = "noopener";
+        document.createElement(
+          "a"
+        );
 
       link.className =
         "link-block";
 
-      link.textContent =
+      link.href =
+        block.url ||
+        getBlockUrl(block);
+
+      link.target = "_blank";
+
+      link.rel =
+        "noopener noreferrer";
+
+
+      const imageUrl =
+        getImageUrl(block);
+
+
+      if (imageUrl) {
+
+        const image =
+          document.createElement(
+            "img"
+          );
+
+        image.src =
+          imageUrl;
+
+        image.loading =
+          "lazy";
+
+        image.onerror =
+          () => {
+
+            image.style.display =
+              "none";
+
+          };
+
+
+        link.appendChild(image);
+
+      }
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+      title.className =
+        "link-title";
+
+      title.textContent =
         block.title ||
-        block.type;
+        block.filename ||
+        "attachment";
+
+
+      link.appendChild(title);
+
+      wrapper.appendChild(link);
+
+      return wrapper;
+
+    }
+
+
+    /*
+     * ----------------------------------------
+     * EMBED
+     * ----------------------------------------
+     */
+
+    if (
+      block.type === "Embed"
+    ) {
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.className =
+        "link-block";
+
+      link.href =
+        block.embed?.source_url ||
+        block.source?.url ||
+        getBlockUrl(block);
+
+      link.target = "_blank";
+
+      link.rel =
+        "noopener noreferrer";
+
+
+      const imageUrl =
+        getImageUrl(block);
+
+
+      if (imageUrl) {
+
+        const image =
+          document.createElement(
+            "img"
+          );
+
+        image.src =
+          imageUrl;
+
+        image.loading =
+          "lazy";
+
+        image.onerror =
+          () => {
+
+            image.style.display =
+              "none";
+
+          };
+
+
+        link.appendChild(image);
+
+      }
+
+
+      const title =
+        document.createElement(
+          "div"
+        );
+
+      title.className =
+        "link-title";
+
+      title.textContent =
+        block.title ||
+        block.embed?.title ||
+        "embed";
+
+
+      link.appendChild(title);
 
       wrapper.appendChild(link);
 
@@ -780,7 +1428,173 @@
 
 
   /*
+   * ==========================================
+   * IMAGE URL
+   *
+   * V3 image representations use src.
+   *
+   * We try the larger versions first.
+   * ==========================================
+   */
+
+  function getImageUrl(block) {
+
+    const image =
+      block.image;
+
+
+    if (!image) {
+      return null;
+    }
+
+
+    return (
+      image.large?.src ||
+      image.medium?.src ||
+      image.small?.src ||
+      image.src ||
+      null
+    );
+
+  }
+
+
+  /*
+   * ==========================================
+   * BLOCK URL
+   * ==========================================
+   */
+
+  function getBlockUrl(block) {
+
+    if (
+      block._links?.self?.href
+    ) {
+
+      return block
+        ._links
+        .self
+        .href;
+
+    }
+
+
+    return (
+      `https://www.are.na/block/${block.id}`
+    );
+
+  }
+
+
+  /*
+   * ==========================================
+   * EXTERNAL URL
+   * ==========================================
+   */
+
+  function getBlockExternalUrl(
+    block
+  ) {
+
+    return (
+      block.url ||
+      block.source?.url ||
+      getBlockUrl(block)
+    );
+
+  }
+
+
+  /*
+   * ==========================================
+   * UI HELPERS
+   * ==========================================
+   */
+
+  function showLoading() {
+
+    document.getElementById(
+      "content"
+    ).innerHTML =
+      `<div class="message">
+        loading…
+      </div>`;
+
+  }
+
+
+  function clearLoading() {
+
+    const message =
+      document.querySelector(
+        ".message"
+      );
+
+    if (message) {
+      message.remove();
+    }
+
+  }
+
+
+  function showEmpty(text) {
+
+    document.getElementById(
+      "content"
+    ).innerHTML =
+      `<div class="message">
+        ${text}
+      </div>`;
+
+  }
+
+
+  function showError(text) {
+
+    document.getElementById(
+      "content"
+    ).innerHTML =
+      `<div class="message">
+        ${text}
+      </div>`;
+
+  }
+
+
+  function showLoadMore() {
+
+    document.getElementById(
+      "loadMore"
+    ).style.display =
+      "block";
+
+  }
+
+
+  function hideLoadMore() {
+
+    document.getElementById(
+      "loadMore"
+    ).style.display =
+      "none";
+
+  }
+
+
+  function setStatus(text) {
+
+    document.getElementById(
+      "status"
+    ).textContent =
+      text;
+
+  }
+
+
+  /*
+   * ==========================================
    * START
+   * ==========================================
    */
 
   loadChannels();
@@ -789,4 +1603,3 @@
 
 </body>
 </html>
-
