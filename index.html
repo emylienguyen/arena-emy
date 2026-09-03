@@ -288,7 +288,6 @@
 
     /* ==================================================
        SCROLL TO TOP BUTTON
-       BOTTOM CENTER
     ================================================== */
 
     .scroll-top {
@@ -332,10 +331,6 @@
         visibility 0.2s ease,
         transform 0.2s ease;
     }
-
-    /* ==================================================
-       SHOW BUTTON AFTER ONLY A LITTLE SCROLLING
-    ================================================== */
 
     .scroll-top.visible {
       opacity: 1;
@@ -491,8 +486,6 @@
     load more
   </button>
 
-
-  <!-- SCROLL TO TOP BUTTON -->
 
   <button
     class="scroll-top"
@@ -2230,25 +2223,20 @@ async function refreshCurrentChannel() {
    SCROLL TO TOP
 ================================================== */
 
+/*
+ * Button appears after approximately
+ * 60px of scrolling inside the iframe.
+ */
+
+const SCROLL_THRESHOLD =
+  60;
+
+
 const scrollTopButton =
   document.getElementById(
     "scrollTop"
   );
 
-
-/*
- * Show the button after only 40px
- * of scrolling.
- */
-
-const SCROLL_THRESHOLD =
-  100;
-
-
-/*
- * Listen for scrolling inside
- * the iframe/document.
- */
 
 window.addEventListener(
   "scroll",
@@ -2281,8 +2269,7 @@ window.addEventListener(
 
 
 /*
- * Scroll to the top of this
- * iframe first.
+ * Scroll the iframe itself to the top.
  */
 
 function scrollIframeToTop() {
@@ -2296,23 +2283,18 @@ function scrollIframeToTop() {
 
 
 /*
- * Ask the parent Readymag page
- * to scroll to the iframe.
- *
- * This is sent using postMessage
- * because the iframe normally cannot
- * directly control a parent page on
- * another domain.
+ * Tell the Readymag parent page
+ * to scroll all the way to the top.
  */
 
-function scrollReadymagPageToIframe() {
+function scrollParentToTop() {
 
   try {
 
     window.parent.postMessage(
       {
         type:
-          "ARENA_SCROLL_TO_TOP"
+          "ARENA_SCROLL_PARENT_TO_TOP"
       },
       "*"
     );
@@ -2330,28 +2312,20 @@ function scrollReadymagPageToIframe() {
 
 
 /*
- * BUTTON CLICK
+ * When clicked:
+ *
+ * 1. Scroll iframe to its own top.
+ * 2. Tell Readymag to scroll its
+ *    entire page to the very top.
  */
 
 scrollTopButton.addEventListener(
   "click",
   function() {
 
-    /*
-     * First scroll this iframe
-     * back to its own top.
-     */
-
     scrollIframeToTop();
 
-
-    /*
-     * Then tell Readymag that
-     * we want the parent page to
-     * return to the iframe position.
-     */
-
-    scrollReadymagPageToIframe();
+    scrollParentToTop();
 
   }
 );
