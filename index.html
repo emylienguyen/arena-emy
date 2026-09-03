@@ -4,6 +4,7 @@
 <head>
 
   <meta charset="UTF-8">
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -66,9 +67,9 @@
     }
 
 
-   .top {
-  display: none;
-}
+    .top {
+      display: none;
+    }
 
 
     .status {
@@ -79,21 +80,21 @@
 
     /* CHANNEL NAV */
 
-   nav {
+    nav {
 
-  display: flex;
+      display: flex;
 
-  gap: 16px;
+      gap: 16px;
 
-  padding:
-    12px 16px;
+      padding:
+        12px 16px;
 
-  overflow-x: auto;
+      overflow-x: auto;
 
-  white-space: nowrap;
+      white-space: nowrap;
 
-  scrollbar-width: none;
-}
+      scrollbar-width: none;
+    }
 
 
     nav::-webkit-scrollbar {
@@ -386,11 +387,13 @@
 <header>
 
   <div class="top">
-  <div
-    class="status"
-    id="status"
-  ></div>
-</div>
+
+    <div
+      class="status"
+      id="status"
+    ></div>
+
+  </div>
 
 
   <nav id="nav"></nav>
@@ -447,7 +450,23 @@ const API =
   "https://api.are.na/v3";
 
 
-const PER_PAGE = 50;
+/*
+ * Are.na allows up to 100 items per page.
+ */
+
+const PER_PAGE = 100;
+
+
+/*
+ * Automatically refresh the currently
+ * displayed content every 5 minutes.
+ *
+ * This matches the caching behaviour of
+ * unauthenticated Are.na API responses.
+ */
+
+const REFRESH_INTERVAL =
+  5 * 60 * 1000;
 
 
 /* ==================================================
@@ -465,6 +484,16 @@ let hasMore = false;
 
 let loading = false;
 
+let refreshTimer = null;
+
+
+/*
+ * Prevent old API responses from rendering
+ * after the user has clicked another channel.
+ */
+
+let viewRequestId = 0;
+
 
 /* ==================================================
    API REQUEST
@@ -474,7 +503,9 @@ let loading = false;
 async function request(url) {
 
   const response =
-    await fetch(url);
+    await fetch(url, {
+      cache: "no-cache"
+    });
 
 
   if (!response.ok) {
@@ -505,7 +536,11 @@ async function loadChannels() {
 
 
     /*
-     * Get everything created by you.
+     * Get all content created by you,
+     * then keep only Channel objects.
+     *
+     * We paginate this because Are.na's
+     * user-content endpoint is paginated.
      */
 
     let page = 1;
@@ -517,7 +552,7 @@ async function loadChannels() {
 
       const result =
         await request(
-          `${API}/users/${USER}/contents?page=${page}&per=100`
+          `${API}/users/${USER}/contents?page=${page}&per=${PER_PAGE}`
         );
 
 
@@ -546,7 +581,7 @@ async function loadChannels() {
 
 
     /*
-     * Keep only Channel objects.
+     * Keep only channels.
      */
 
     channels =
@@ -557,7 +592,7 @@ async function loadChannels() {
 
 
     /*
-     * Remove duplicates.
+     * Remove duplicate channels.
      */
 
     const ids =
@@ -586,7 +621,7 @@ async function loadChannels() {
 
 
     /*
-     * Alphabetical order.
+     * Alphabetical navigation.
      */
 
     channels.sort(
@@ -607,14 +642,26 @@ async function loadChannels() {
      * Start with ALL.
      */
 
-    showAll();
+    await showAll();
+
+
+    /*
+     * Start automatic syncing.
+     */
+
+    startAutoRefresh();
 
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "CHANNEL LIST ERROR:",
+      error
+    );
+
 
     setStatus("");
+
 
     showError(
       "Couldn't load your channels."
@@ -668,7 +715,9 @@ function buildNav() {
     showAll;
 
 
-  nav.appendChild(all);
+  nav.appendChild(
+    all
+  );
 
 
   /*
@@ -749,20 +798,93 @@ function setActive(id) {
 
 
 /* ==================================================
+   FETCH ONE CHANNEL — ALL PAGES
+================================================== */
+
+
+async function fetchAllChannelBlocks(
+  channel
+) {
+
+  let page = 1;
+
+  let blocks = [];
+
+
+  while (true) {
+
+    const result =
+      await request(
+        `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`
+      );
+
+
+    if (result.data) {
+
+      blocks.push(
+        ...result.data
+      );
+
+    }
+
+
+    /*
+     * Stop when there are no more pages.
+     */
+
+    if (
+      !result.meta ||
+      !result.meta.has_more_pages
+    ) {
+
+      break;
+
+    }
+
+
+    page++;
+
+  }
+
+
+  return blocks;
+
+}
+
+
+/* ==================================================
    SHOW ALL
 ================================================== */
 
 
-async function showAll() {
+async function showAll(
+  preserveScroll = false
+) {
+
+  const requestId =
+    ++viewRequestId;
+
 
   currentChannel =
     null;
 
 
+  currentPage =
+    1;
+
+
+  hasMore =
+    false;
+
+
   setActive("all");
 
 
-  reset();
+  if (!preserveScroll) {
+
+    reset();
+
+  }
 
 
   document.getElementById(
@@ -777,61 +899,151 @@ async function showAll() {
   try {
 
     /*
-     * Get the first 50 blocks
-     * from each channel.
+     * Fetch every page from every channel.
+     *
+     * Promise.all means the channels are
+     * fetched in parallel rather than one
+     * after another.
      */
 
     const results =
       await Promise.all(
 
         channels.map(
-          channel =>
+          async channel => {
 
-            request(
-              `${API}/channels/${channel.id}/contents?page=1&per=${PER_PAGE}`
-            )
+            const blocks =
+              await fetchAllChannelBlocks(
+                channel
+              );
 
+
+            return {
+              channel,
+              blocks
+            };
+
+          }
         )
 
       );
 
 
+    /*
+     * If the user clicked another channel
+     * while this request was running,
+     * don't overwrite that newer view.
+     */
+
+    if (
+      requestId !== viewRequestId
+    ) {
+
+      return;
+
+    }
+
+
     let blocks = [];
 
 
+    /*
+     * Combine all channel contents.
+     */
+
     results.forEach(
-      (result, index) => {
+      result => {
 
-        const channel =
-          channels[index];
-
-
-        if (!result.data) {
-          return;
-        }
-
-
-        result.data.forEach(
+        result.blocks.forEach(
           block => {
 
+            /*
+             * Don't render nested channels.
+             */
+
             if (
-              block.type !==
-              "Channel"
+              block.type === "Channel"
             ) {
 
-              blocks.push({
-
-                ...block,
-
-                sourceChannel:
-                  channel.title
-
-              });
+              return;
 
             }
 
+
+            blocks.push({
+
+              ...block,
+
+              sourceChannel:
+                result.channel.title
+
+            });
+
           }
         );
+
+      }
+    );
+
+
+    /*
+     * Remove duplicate blocks.
+     *
+     * The same Are.na block can be connected
+     * to several channels.
+     */
+
+    const seen =
+      new Set();
+
+
+    blocks =
+      blocks.filter(
+        block => {
+
+          if (
+            seen.has(block.id)
+          ) {
+
+            return false;
+
+          }
+
+
+          seen.add(
+            block.id
+          );
+
+
+          return true;
+
+        }
+      );
+
+
+    /*
+     * Sort newest first.
+     *
+     * Prefer created_at because "all"
+     * represents your additions.
+     */
+
+    blocks.sort(
+      (a, b) => {
+
+        const dateA =
+          new Date(
+            a.created_at || 0
+          ).getTime();
+
+
+        const dateB =
+          new Date(
+            b.created_at || 0
+          ).getTime();
+
+
+        return dateB - dateA;
 
       }
     );
@@ -846,12 +1058,24 @@ async function showAll() {
     );
 
 
+    updateLoadMore();
+
+
   } catch (error) {
 
     console.error(
       "ALL ERROR:",
       error
     );
+
+
+    if (
+      requestId !== viewRequestId
+    ) {
+
+      return;
+
+    }
 
 
     showError(
@@ -872,12 +1096,20 @@ async function showChannel(
   channel
 ) {
 
+  const requestId =
+    ++viewRequestId;
+
+
   currentChannel =
     channel;
 
 
   currentPage =
     1;
+
+
+  hasMore =
+    false;
 
 
   setActive(
@@ -902,8 +1134,18 @@ async function showChannel(
     await loadChannelPage(
       channel,
       1,
-      true
+      true,
+      requestId
     );
+
+
+    if (
+      requestId !== viewRequestId
+    ) {
+
+      return;
+
+    }
 
 
     window.scrollTo(
@@ -920,6 +1162,15 @@ async function showChannel(
       "CHANNEL ERROR:",
       error
     );
+
+
+    if (
+      requestId !== viewRequestId
+    ) {
+
+      return;
+
+    }
 
 
     showError(
@@ -939,15 +1190,19 @@ async function showChannel(
 async function loadChannelPage(
   channel,
   page,
-  replace
+  replace,
+  requestId
 ) {
 
   if (loading) {
+
     return;
+
   }
 
 
-  loading = true;
+  loading =
+    true;
 
 
   try {
@@ -966,10 +1221,17 @@ async function loadChannelPage(
       await request(url);
 
 
-    console.log(
-      "Channel response:",
-      result
-    );
+    /*
+     * Don't render stale responses.
+     */
+
+    if (
+      requestId !== viewRequestId
+    ) {
+
+      return;
+
+    }
 
 
     const blocks =
@@ -1004,7 +1266,8 @@ async function loadChannelPage(
 
   } finally {
 
-    loading = false;
+    loading =
+      false;
 
   }
 
@@ -1041,11 +1304,19 @@ document
     await loadChannelPage(
       currentChannel,
       currentPage + 1,
-      false
+      false,
+      viewRequestId
     );
 
 
     if (hasMore) {
+
+      this.textContent =
+        "load more";
+
+    }
+
+    else {
 
       this.textContent =
         "load more";
@@ -1143,12 +1414,6 @@ function createBlock(
     "Image"
   ) {
 
-    /*
-     * THIS MATCHES THE
-     * ACTUAL API RESPONSE
-     * YOU SENT ME.
-     */
-
     const imageUrl =
       block.image?.large?.src ||
       block.image?.medium?.src ||
@@ -1162,6 +1427,7 @@ function createBlock(
         "Image without URL:",
         block
       );
+
 
       return null;
 
@@ -1206,11 +1472,9 @@ function createBlock(
       "lazy";
 
 
-    /*
-     * If a specific image
-     * can't load, don't break
-     * the rest of the page.
-     */
+    image.decoding =
+      "async";
+
 
     image.onerror =
       function() {
@@ -1219,6 +1483,7 @@ function createBlock(
           "Image failed:",
           imageUrl
         );
+
 
         wrapper.remove();
 
@@ -1330,10 +1595,6 @@ function createBlock(
       "noopener noreferrer";
 
 
-    /*
-     * Link preview image.
-     */
-
     const imageUrl =
       block.image?.large?.src ||
       block.image?.medium?.src ||
@@ -1355,6 +1616,10 @@ function createBlock(
 
       image.loading =
         "lazy";
+
+
+      image.decoding =
+        "async";
 
 
       image.onerror =
@@ -1480,6 +1745,10 @@ function createBlock(
         "lazy";
 
 
+      image.decoding =
+        "async";
+
+
       link.appendChild(
         image
       );
@@ -1574,6 +1843,10 @@ function createBlock(
         "lazy";
 
 
+      image.decoding =
+        "async";
+
+
       link.appendChild(
         image
       );
@@ -1664,17 +1937,19 @@ function showLoading() {
 
 function clearLoading() {
 
-  const message =
-    document.querySelector(
+  const messages =
+    document.querySelectorAll(
       ".message"
     );
 
 
-  if (message) {
+  messages.forEach(
+    message => {
 
-    message.remove();
+      message.remove();
 
-  }
+    }
+  );
 
 }
 
@@ -1719,7 +1994,9 @@ function updateLoadMore() {
     button.style.display =
       "block";
 
-  } else {
+  }
+
+  else {
 
     button.style.display =
       "none";
@@ -1742,6 +2019,174 @@ function setStatus(
     "status"
   ).textContent =
     text;
+
+}
+
+
+/* ==================================================
+   AUTOMATIC REFRESH
+================================================== */
+
+
+function startAutoRefresh() {
+
+  /*
+   * Don't create multiple timers.
+   */
+
+  if (refreshTimer) {
+
+    clearInterval(
+      refreshTimer
+    );
+
+  }
+
+
+  refreshTimer =
+    setInterval(
+      async function() {
+
+        /*
+         * Only refresh if the page is
+         * currently visible.
+         *
+         * This avoids unnecessary API
+         * requests when the browser tab
+         * is in the background.
+         */
+
+        if (
+          document.visibilityState !==
+          "visible"
+        ) {
+
+          return;
+
+        }
+
+
+        console.log(
+          "Automatic Are.na refresh…"
+        );
+
+
+        if (
+          currentChannel
+        ) {
+
+          /*
+           * Refresh the current channel.
+           */
+
+          await refreshCurrentChannel();
+
+        }
+
+        else {
+
+          /*
+           * Refresh ALL.
+           */
+
+          await showAll(true);
+
+        }
+
+      },
+      REFRESH_INTERVAL
+    );
+
+}
+
+
+/* ==================================================
+   REFRESH CURRENT CHANNEL
+================================================== */
+
+
+async function refreshCurrentChannel() {
+
+  if (
+    !currentChannel ||
+    loading
+  ) {
+
+    return;
+
+  }
+
+
+  const requestId =
+    ++viewRequestId;
+
+
+  try {
+
+    /*
+     * Refresh from page 1.
+     *
+     * We deliberately don't clear the
+     * existing grid until the new data
+     * has successfully arrived.
+     */
+
+    const result =
+      await request(
+        `${API}/channels/${currentChannel.id}/contents?page=1&per=${PER_PAGE}`
+      );
+
+
+    if (
+      requestId !== viewRequestId
+    ) {
+
+      return;
+
+    }
+
+
+    const blocks =
+      result.data || [];
+
+
+    const grid =
+      document.getElementById(
+        "grid"
+      );
+
+
+    grid.innerHTML =
+      "";
+
+
+    render(
+      blocks,
+      true
+    );
+
+
+    hasMore =
+      result.meta?.has_more_pages
+      || false;
+
+
+    currentPage =
+      result.meta?.current_page
+      || 1;
+
+
+    updateLoadMore();
+
+
+  } catch (error) {
+
+    console.error(
+      "AUTO REFRESH ERROR:",
+      error
+    );
+
+  }
 
 }
 
