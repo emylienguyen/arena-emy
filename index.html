@@ -191,6 +191,18 @@
       background: #f5f5f5;
 
     }
+.block video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f5f5f5;
+  object-fit: cover;
+}
+
+.video-link {
+  display: block;
+  cursor: pointer;
+}
 
 
     /* CAPTION */
@@ -1690,14 +1702,306 @@ function createBlock(
   }
 
 
+ /* -----------------------------------------------
+   ATTACHMENT / VIDEO
+------------------------------------------------ */
+
+if (
+  block.type ===
+  "Attachment"
+) {
+
+  /*
+   * Are.na attachments can contain videos.
+   *
+   * Try to find the actual file URL from the
+   * attachment object.
+   */
+
+  const attachmentUrl =
+    block.attachment?.url ||
+    block.url ||
+    block.attachment?.file_url;
+
+
+  /*
+   * Detect common video formats.
+   */
+
+  const isVideo =
+    attachmentUrl &&
+    /\.(mp4|webm|mov|m4v|ogv)(\?.*)?$/i.test(
+      attachmentUrl
+    );
+
+
   /* -----------------------------------------------
-     ATTACHMENT
+     VIDEO
   ------------------------------------------------ */
 
-  if (
-    block.type ===
-    "Attachment"
-  ) {
+  if (isVideo) {
+
+    /*
+     * Clicking the video goes to the original
+     * Are.na block rather than the video file.
+     */
+
+    const link =
+      document.createElement(
+        "a"
+      );
+
+
+    link.className =
+      "video-link";
+
+
+    link.href =
+      `https://www.are.na/block/${block.id}`;
+
+
+    link.target =
+      "_blank";
+
+
+    link.rel =
+      "noopener noreferrer";
+
+
+    const video =
+      document.createElement(
+        "video"
+      );
+
+
+    video.src =
+      attachmentUrl;
+
+
+    /*
+     * Autoplay requirements:
+     *
+     * muted  = browsers allow autoplay
+     * loop   = video repeats forever
+     * playsinline = prevents fullscreen takeover
+     * autoplay = starts automatically
+     */
+
+    video.autoplay =
+      true;
+
+
+    video.muted =
+      true;
+
+
+    video.loop =
+      true;
+
+
+    video.playsInline =
+      true;
+
+
+    video.setAttribute(
+      "autoplay",
+      ""
+    );
+
+
+    video.setAttribute(
+      "muted",
+      ""
+    );
+
+
+    video.setAttribute(
+      "loop",
+      ""
+    );
+
+
+    video.setAttribute(
+      "playsinline",
+      ""
+    );
+
+
+    /*
+     * Don't show browser video controls.
+     * The video itself is the visual object.
+     */
+
+    video.controls =
+      false;
+
+
+    /*
+     * If autoplay is blocked for any reason,
+     * try starting playback once the element
+     * has been added to the page.
+     */
+
+    video.addEventListener(
+      "canplay",
+      function() {
+
+        video.play().catch(
+          function(error) {
+
+            console.log(
+              "Autoplay prevented:",
+              error
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+    link.appendChild(
+      video
+    );
+
+
+    wrapper.appendChild(
+      link
+    );
+
+
+    /*
+     * Optional title/caption.
+     */
+
+    if (block.title) {
+
+      const caption =
+        document.createElement(
+          "div"
+        );
+
+
+      caption.className =
+        "caption";
+
+
+      caption.textContent =
+        block.title;
+
+
+      wrapper.appendChild(
+        caption
+      );
+
+    }
+
+
+    return wrapper;
+
+  }
+
+
+  /* -----------------------------------------------
+     NORMAL ATTACHMENT
+  ------------------------------------------------ */
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+
+  link.className =
+    "link-block";
+
+
+  link.href =
+    block.url ||
+    `https://www.are.na/block/${block.id}`;
+
+
+  link.target =
+    "_blank";
+
+
+  link.rel =
+    "noopener noreferrer";
+
+
+  const imageUrl =
+    block.image?.large?.src ||
+    block.image?.medium?.src ||
+    block.image?.small?.src ||
+    block.image?.src;
+
+
+  if (imageUrl) {
+
+    const image =
+      document.createElement(
+        "img"
+      );
+
+
+    image.src =
+      imageUrl;
+
+
+    image.loading =
+      "lazy";
+
+
+    image.decoding =
+      "async";
+
+
+    image.onerror =
+      function() {
+
+        image.style.display =
+          "none";
+
+      };
+
+
+    link.appendChild(
+      image
+    );
+
+  }
+
+
+  const title =
+    document.createElement(
+      "div"
+    );
+
+
+  title.className =
+    "link-title";
+
+
+  title.textContent =
+    block.title ||
+    block.filename ||
+    "attachment";
+
+
+  link.appendChild(
+    title
+  );
+
+
+  wrapper.appendChild(
+    link
+  );
+
+
+  return wrapper;
+
+}
 
     const link =
       document.createElement(
