@@ -72,7 +72,6 @@
 
     /* ==================================================
        CHANNEL NAVIGATION
-       ONE LINE + HORIZONTAL SCROLL
     ================================================== */
 
     nav {
@@ -288,32 +287,22 @@
     }
 
     /* ==================================================
-       SCROLL TO TOP
+       SCROLL TO TOP BUTTON
        BOTTOM CENTER
     ================================================== */
 
     .scroll-top {
       position: fixed;
 
-      /*
-       * Center horizontally.
-       */
       left: 50%;
 
-      /*
-       * Move the button back by half
-       * of its own width.
-       */
-      transform:
-        translateX(-50%)
-        translateY(6px);
-
-      /*
-       * Position at bottom center.
-       */
       bottom: 16px;
 
       z-index: 200;
+
+      transform:
+        translateX(-50%)
+        translateY(6px);
 
       border: 0;
 
@@ -335,9 +324,6 @@
 
       cursor: pointer;
 
-      /*
-       * Hidden initially.
-       */
       opacity: 0;
       visibility: hidden;
 
@@ -347,9 +333,10 @@
         transform 0.2s ease;
     }
 
-    /*
-     * Visible after scrolling down.
-     */
+    /* ==================================================
+       SHOW BUTTON AFTER ONLY A LITTLE SCROLLING
+    ================================================== */
+
     .scroll-top.visible {
       opacity: 1;
       visibility: visible;
@@ -393,8 +380,6 @@
         padding:
           10px 12px 7px;
       }
-
-      /* MOBILE CHANNEL NAVIGATION */
 
       nav {
         padding-left: 12px;
@@ -444,11 +429,8 @@
           16px 10px;
       }
 
-      /* MOBILE SCROLL TO TOP */
-
       .scroll-top {
         bottom: 12px;
-
         font-size: 11px;
       }
 
@@ -510,7 +492,7 @@
   </button>
 
 
-  <!-- SCROLL TO TOP -->
+  <!-- SCROLL TO TOP BUTTON -->
 
   <button
     class="scroll-top"
@@ -587,7 +569,7 @@ async function request(url) {
 
 
 /* ==================================================
-   LOAD YOUR CREATED CHANNELS
+   LOAD CHANNELS
 ================================================== */
 
 async function loadChannels() {
@@ -679,7 +661,6 @@ async function loadChannels() {
     buildNav();
 
     setStatus("");
-
 
     await showAll();
 
@@ -820,7 +801,7 @@ function setActive(id) {
 
 
 /* ==================================================
-   FETCH ONE CHANNEL — ALL PAGES
+   FETCH CHANNEL BLOCKS
 ================================================== */
 
 async function fetchAllChannelBlocks(
@@ -1031,12 +1012,10 @@ async function showAll(
 
     clearLoading();
 
-
     render(
       blocks,
       true
     );
-
 
     updateLoadMore();
 
@@ -1127,12 +1106,10 @@ async function showChannel(
     }
 
 
-    window.scrollTo(
-      {
-        top: 0,
-        behavior: "smooth"
-      }
-    );
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
 
 
   } catch (error) {
@@ -1189,12 +1166,6 @@ async function loadChannelPage(
       `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`;
 
 
-    console.log(
-      "Loading:",
-      url
-    );
-
-
     const result =
       await request(url);
 
@@ -1244,7 +1215,6 @@ async function loadChannelPage(
       false;
 
   }
-
 
 }
 
@@ -1758,19 +1728,6 @@ function createBlock(
       );
 
 
-      video.addEventListener(
-        "error",
-        function() {
-
-          console.warn(
-            "Video failed:",
-            attachmentUrl
-          );
-
-        }
-      );
-
-
       link.appendChild(
         video
       );
@@ -2166,11 +2123,6 @@ function startAutoRefresh() {
         }
 
 
-        console.log(
-          "Automatic Are.na refresh…"
-        );
-
-
         if (
           currentChannel
         ) {
@@ -2284,12 +2236,27 @@ const scrollTopButton =
   );
 
 
+/*
+ * Show the button after only 40px
+ * of scrolling.
+ */
+
+const SCROLL_THRESHOLD =
+  100;
+
+
+/*
+ * Listen for scrolling inside
+ * the iframe/document.
+ */
+
 window.addEventListener(
   "scroll",
   function() {
 
     if (
-      window.scrollY > 400
+      window.scrollY >
+      SCROLL_THRESHOLD
     ) {
 
       scrollTopButton.classList.add(
@@ -2306,18 +2273,85 @@ window.addEventListener(
 
     }
 
+  },
+  {
+    passive: true
   }
 );
 
+
+/*
+ * Scroll to the top of this
+ * iframe first.
+ */
+
+function scrollIframeToTop() {
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
+
+
+/*
+ * Ask the parent Readymag page
+ * to scroll to the iframe.
+ *
+ * This is sent using postMessage
+ * because the iframe normally cannot
+ * directly control a parent page on
+ * another domain.
+ */
+
+function scrollReadymagPageToIframe() {
+
+  try {
+
+    window.parent.postMessage(
+      {
+        type:
+          "ARENA_SCROLL_TO_TOP"
+      },
+      "*"
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Could not communicate with parent page:",
+      error
+    );
+
+  }
+
+}
+
+
+/*
+ * BUTTON CLICK
+ */
 
 scrollTopButton.addEventListener(
   "click",
   function() {
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    /*
+     * First scroll this iframe
+     * back to its own top.
+     */
+
+    scrollIframeToTop();
+
+
+    /*
+     * Then tell Readymag that
+     * we want the parent page to
+     * return to the iframe position.
+     */
+
+    scrollReadymagPageToIframe();
 
   }
 );
