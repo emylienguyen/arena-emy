@@ -70,29 +70,45 @@
       font-size: 11px;
     }
 
+
     /* ==================================================
        CHANNEL NAVIGATION
     ================================================== */
 
     nav {
       display: flex;
-      align-items: center;
 
       gap: 16px;
-
-      width: 100%;
 
       padding:
         12px 16px;
 
-      overflow-x: auto;
-      overflow-y: hidden;
+      /*
+       * Keep all channels on ONE line.
+       */
 
       flex-wrap: nowrap;
 
       white-space: nowrap;
 
-      -webkit-overflow-scrolling: touch;
+      /*
+       * Allow horizontal scrolling when
+       * there are more channels than fit.
+       */
+
+      overflow-x: auto;
+      overflow-y: hidden;
+
+      /*
+       * Smooth touch scrolling on phones.
+       */
+
+      -webkit-overflow-scrolling:
+        touch;
+
+      /*
+       * Hide scrollbar.
+       */
 
       scrollbar-width: none;
     }
@@ -102,6 +118,12 @@
     }
 
     nav button {
+
+      /*
+       * Prevent individual buttons
+       * from shrinking.
+       */
+
       flex: 0 0 auto;
 
       border: 0;
@@ -125,6 +147,7 @@
       color: #111;
     }
 
+
     /* ==================================================
        MAIN
     ================================================== */
@@ -141,6 +164,7 @@
       font-size: 13px;
       font-weight: normal;
     }
+
 
     /* ==================================================
        GRID
@@ -161,6 +185,7 @@
       align-items: start;
     }
 
+
     /* ==================================================
        BLOCK
     ================================================== */
@@ -177,6 +202,7 @@
 
       background: #f5f5f5;
     }
+
 
     /* ==================================================
        VIDEO
@@ -200,6 +226,7 @@
       pointer-events: none;
     }
 
+
     /* ==================================================
        CAPTION
     ================================================== */
@@ -210,6 +237,7 @@
       color: #777;
       font-size: 11px;
     }
+
 
     /* ==================================================
        TEXT
@@ -222,6 +250,7 @@
 
       white-space: pre-wrap;
     }
+
 
     /* ==================================================
        LINKS
@@ -253,6 +282,7 @@
       word-break: break-word;
     }
 
+
     /* ==================================================
        MESSAGES
     ================================================== */
@@ -261,6 +291,7 @@
       padding: 40px 0;
       color: #999;
     }
+
 
     /* ==================================================
        LOAD MORE
@@ -287,8 +318,9 @@
       color: #111;
     }
 
+
     /* ==================================================
-       SCROLL TO TOP
+       SCROLL TO TOP BUTTON
     ================================================== */
 
     #scrollTop {
@@ -296,15 +328,20 @@
       position: fixed;
 
       left: 50%;
+
       bottom: 15px;
 
       transform:
-        translateX(-50%)
-        translateY(8px);
+        translateX(-50%);
 
       z-index: 999999;
 
-      display: block;
+      /*
+       * Hidden until the user scrolls
+       * approximately 60px.
+       */
+
+      display: none;
 
       border: 0;
 
@@ -329,40 +366,10 @@
       line-height: 1;
 
       cursor: pointer;
-
-      opacity: 0;
-
-      visibility: hidden;
-
-      pointer-events: none;
-
-      transition:
-        opacity 0.18s ease,
-        transform 0.18s ease,
-        visibility 0.18s ease;
-
     }
-
-
-    #scrollTop.visible {
-
-      opacity: 1;
-
-      visibility: visible;
-
-      pointer-events: auto;
-
-      transform:
-        translateX(-50%)
-        translateY(0);
-
-    }
-
 
     #scrollTop:hover {
-
       color: #111;
-
     }
 
 
@@ -393,6 +400,11 @@
         font-size: 12px;
       }
 
+      .top {
+        padding:
+          10px 12px 7px;
+      }
+
       nav {
 
         padding-left: 12px;
@@ -402,31 +414,26 @@
 
         gap: 13px;
 
-        overflow-x: auto;
+        /*
+         * Still one line on mobile.
+         */
 
         flex-wrap: nowrap;
 
-        white-space: nowrap;
+        overflow-x: auto;
 
       }
 
       nav button {
-
-        flex: 0 0 auto;
-
         font-size: 12px;
-
       }
 
       main {
-
         padding:
           14px 12px 50px;
-
       }
 
       .grid {
-
         grid-template-columns:
           repeat(
             2,
@@ -435,13 +442,10 @@
 
         gap:
           16px 10px;
-
       }
 
       #scrollTop {
-
         bottom: 12px;
-
       }
 
     }
@@ -494,8 +498,8 @@
 
 
   <button
-    id="loadMore"
     class="load-more"
+    id="loadMore"
     style="display:none"
   >
     load more
@@ -503,6 +507,10 @@
 
 </main>
 
+
+<!-- ==================================================
+     SCROLL TO TOP BUTTON
+================================================== -->
 
 <button
   id="scrollTop"
@@ -533,8 +541,8 @@ const REFRESH_INTERVAL =
 
 
 /*
- * The button appears after approximately
- * 60 pixels of vertical scrolling.
+ * The scroll-to-top button appears
+ * after approximately 60px.
  */
 
 const SCROLL_THRESHOLD =
@@ -586,7 +594,7 @@ async function request(url) {
 
 
 /* ==================================================
-   LOAD CHANNELS
+   LOAD YOUR CREATED CHANNELS
 ================================================== */
 
 async function loadChannels() {
@@ -818,7 +826,7 @@ function setActive(id) {
 
 
 /* ==================================================
-   FETCH CHANNEL BLOCKS
+   FETCH ONE CHANNEL — ALL PAGES
 ================================================== */
 
 async function fetchAllChannelBlocks(
@@ -1029,10 +1037,12 @@ async function showAll(
 
     clearLoading();
 
+
     render(
       blocks,
       true
     );
+
 
     updateLoadMore();
 
@@ -1123,10 +1133,12 @@ async function showChannel(
     }
 
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    window.scrollTo(
+      {
+        top: 0,
+        behavior: "smooth"
+      }
+    );
 
 
   } catch (error) {
@@ -1181,6 +1193,12 @@ async function loadChannelPage(
 
     const url =
       `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`;
+
+
+    console.log(
+      "Loading:",
+      url
+    );
 
 
     const result =
@@ -1353,7 +1371,9 @@ function createBlock(
     "block";
 
 
-  /* IMAGE */
+  /* -----------------------------------------------
+     IMAGE
+  ------------------------------------------------ */
 
   if (
     block.type ===
@@ -1462,7 +1482,9 @@ function createBlock(
   }
 
 
-  /* TEXT */
+  /* -----------------------------------------------
+     TEXT
+  ------------------------------------------------ */
 
   if (
     block.type ===
@@ -1494,7 +1516,9 @@ function createBlock(
   }
 
 
-  /* LINK */
+  /* -----------------------------------------------
+     LINK
+  ------------------------------------------------ */
 
   if (
     block.type ===
@@ -1620,7 +1644,9 @@ function createBlock(
   }
 
 
-  /* ATTACHMENT / VIDEO */
+  /* -----------------------------------------------
+     ATTACHMENT / VIDEO
+  ------------------------------------------------ */
 
   if (
     block.type ===
@@ -1650,7 +1676,9 @@ function createBlock(
       );
 
 
-    /* VIDEO */
+    /* -----------------------------------------------
+       VIDEO
+    ------------------------------------------------ */
 
     if (
       isVideo &&
@@ -1783,7 +1811,9 @@ function createBlock(
     }
 
 
-    /* NORMAL ATTACHMENT */
+    /* -----------------------------------------------
+       NORMAL ATTACHMENT
+    ------------------------------------------------ */
 
     const link =
       document.createElement(
@@ -1882,7 +1912,9 @@ function createBlock(
   }
 
 
-  /* EMBED */
+  /* -----------------------------------------------
+     EMBED
+    ----------------------------------------------- */
 
   if (
     block.type ===
@@ -2140,6 +2172,11 @@ function startAutoRefresh() {
         }
 
 
+        console.log(
+          "Automatic Are.na refresh…"
+        );
+
+
         if (
           currentChannel
         ) {
@@ -2244,7 +2281,7 @@ async function refreshCurrentChannel() {
 
 
 /* ==================================================
-   SCROLL TO TOP
+   SCROLL TO TOP BUTTON
 ================================================== */
 
 const scrollTopButton =
@@ -2254,16 +2291,19 @@ const scrollTopButton =
 
 
 /*
- * Get the most reliable scroll position
- * available inside the iframe.
+ * Determine the current scroll position
+ * of THIS iframe/page.
  */
 
 function getScrollPosition() {
 
   return Math.max(
     window.scrollY || 0,
+
     window.pageYOffset || 0,
+
     document.documentElement.scrollTop || 0,
+
     document.body.scrollTop || 0
   );
 
@@ -2271,82 +2311,46 @@ function getScrollPosition() {
 
 
 /*
- * Show/hide button.
+ * Show the button after 60px.
  *
- * This runs continuously using
- * requestAnimationFrame so it does not
- * depend entirely on Readymag firing
- * normal scroll events.
+ * We deliberately use a very small
+ * interval instead of changing any of
+ * the content/loading logic.
  */
 
-let lastButtonState =
-  false;
+function checkScrollPosition() {
 
-
-function updateScrollButton() {
-
-  const position =
+  const scrollPosition =
     getScrollPosition();
 
 
-  const shouldShow =
-    position >=
-    SCROLL_THRESHOLD;
-
-
   if (
-    shouldShow !==
-    lastButtonState
+    scrollPosition >=
+    SCROLL_THRESHOLD
   ) {
 
-    lastButtonState =
-      shouldShow;
-
-
-    if (shouldShow) {
-
-      scrollTopButton.classList.add(
-        "visible"
-      );
-
-    }
-
-    else {
-
-      scrollTopButton.classList.remove(
-        "visible"
-      );
-
-    }
+    scrollTopButton.style.display =
+      "block";
 
   }
 
+  else {
 
-  requestAnimationFrame(
-    updateScrollButton
-  );
+    scrollTopButton.style.display =
+      "none";
+
+  }
 
 }
 
 
 /*
- * Start the continuous scroll check.
- */
-
-requestAnimationFrame(
-  updateScrollButton
-);
-
-
-/*
- * Also listen for normal scroll events.
- * This makes the response immediate in
- * browsers that fire the event normally.
+ * Normal scroll listener.
  */
 
 window.addEventListener(
   "scroll",
-  updateScrollButton,
+  checkScrollPosition,
   {
     passive: true
   }
@@ -2354,126 +2358,86 @@ window.addEventListener(
 
 
 /*
- * Scroll the iframe to its own top.
+ * Some embedded browsers don't reliably
+ * fire scroll events, so check periodically.
  */
 
-function scrollIframeToTop() {
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-
-  document.documentElement.scrollTop =
-    0;
-
-  document.body.scrollTop =
-    0;
-
-}
+setInterval(
+  checkScrollPosition,
+  100
+);
 
 
 /*
- * Ask the Readymag parent page to scroll
- * to the absolute top.
- *
- * We send this more than once because
- * Readymag may be handling its own
- * scrolling/layout at the same time.
+ * Initial state.
  */
 
-function askReadymagToScrollTop() {
-
-  const message = {
-
-    type:
-      "ARENA_SCROLL_PARENT_TO_TOP"
-
-  };
+checkScrollPosition();
 
 
-  window.parent.postMessage(
-    message,
-    "*"
-  );
-
-
-  setTimeout(
-    function() {
-
-      window.parent.postMessage(
-        message,
-        "*"
-      );
-
-    },
-    100
-  );
-
-
-  setTimeout(
-    function() {
-
-      window.parent.postMessage(
-        message,
-        "*"
-      );
-
-    },
-    300
-  );
-
-
-  setTimeout(
-    function() {
-
-      window.parent.postMessage(
-        message,
-        "*"
-      );
-
-    },
-    600
-  );
-
-}
-
-
-/*
- * BUTTON CLICK
- */
+/* ==================================================
+   SCROLL TO TOP CLICK
+================================================== */
 
 scrollTopButton.addEventListener(
   "click",
   function() {
 
     /*
-     * Immediately hide the button.
+     * First scroll THIS iframe
+     * completely to the top.
      */
 
-    scrollTopButton.classList.remove(
-      "visible"
-    );
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth"
+    });
 
 
-    lastButtonState =
-      false;
+    document.documentElement.scrollTop =
+      0;
+
+
+    document.body.scrollTop =
+      0;
 
 
     /*
-     * Scroll the Are.na iframe itself.
+     * Also ask the parent Readymag page
+     * to scroll to its own top.
+     *
+     * This does nothing harmful if
+     * Readymag does not listen for it.
      */
 
-    scrollIframeToTop();
+    try {
+
+      window.parent.postMessage(
+        {
+          type:
+            "ARENA_SCROLL_PARENT_TO_TOP"
+        },
+        "*"
+      );
+
+    }
+
+    catch (error) {
+
+      console.warn(
+        "Could not contact parent page."
+      );
+
+    }
 
 
     /*
-     * Tell Readymag to scroll its
-     * entire page to the top.
+     * Hide the button immediately.
      */
 
-    askReadymagToScrollTop();
+    scrollTopButton.style.display =
+      "none";
 
   }
 );
