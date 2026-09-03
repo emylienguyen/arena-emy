@@ -41,7 +41,9 @@
       text-decoration: none;
     }
 
-    /* HEADER */
+    /* ==================================================
+       HEADER
+    ================================================== */
 
     header {
       position: sticky;
@@ -70,14 +72,13 @@
 
     /* ==================================================
        CHANNEL NAVIGATION
-       Keeps ALL channels on ONE LINE.
-       If there are too many to fit, the user can
-       scroll horizontally.
+       ONE LINE + HORIZONTAL SCROLL
     ================================================== */
 
     nav {
       display: flex;
       align-items: center;
+
       gap: 16px;
 
       width: 100%;
@@ -88,36 +89,18 @@
       overflow-x: auto;
       overflow-y: hidden;
 
+      flex-wrap: nowrap;
       white-space: nowrap;
 
-      /*
-       * Smooth horizontal scrolling on mobile.
-       */
       -webkit-overflow-scrolling: touch;
 
-      /*
-       * Hide scrollbar while keeping scrolling enabled.
-       */
       scrollbar-width: none;
-
-      /*
-       * Prevent accidental wrapping.
-       */
-      flex-wrap: nowrap;
     }
 
-    /*
-     * Hide scrollbar in Chrome, Safari and Edge.
-     */
     nav::-webkit-scrollbar {
       display: none;
     }
 
-    /*
-     * IMPORTANT:
-     * Each channel button keeps its natural width
-     * and is never allowed to shrink.
-     */
     nav button {
       flex: 0 0 auto;
 
@@ -142,7 +125,9 @@
       color: #111;
     }
 
-    /* MAIN */
+    /* ==================================================
+       MAIN
+    ================================================== */
 
     main {
       padding:
@@ -157,7 +142,9 @@
       font-weight: normal;
     }
 
-    /* GRID */
+    /* ==================================================
+       GRID
+    ================================================== */
 
     .grid {
       display: grid;
@@ -174,7 +161,9 @@
       align-items: start;
     }
 
-    /* BLOCK */
+    /* ==================================================
+       BLOCK
+    ================================================== */
 
     .block {
       min-width: 0;
@@ -189,7 +178,9 @@
       background: #f5f5f5;
     }
 
-    /* VIDEO */
+    /* ==================================================
+       VIDEO
+    ================================================== */
 
     .video-link {
       display: block;
@@ -206,15 +197,12 @@
 
       object-fit: contain;
 
-      /*
-       * Prevents the browser from showing
-       * a video control interface.
-       */
-
       pointer-events: none;
     }
 
-    /* CAPTION */
+    /* ==================================================
+       CAPTION
+    ================================================== */
 
     .caption {
       margin-top: 6px;
@@ -223,7 +211,9 @@
       font-size: 11px;
     }
 
-    /* TEXT */
+    /* ==================================================
+       TEXT
+    ================================================== */
 
     .text-block {
       padding: 12px;
@@ -233,7 +223,9 @@
       white-space: pre-wrap;
     }
 
-    /* LINKS */
+    /* ==================================================
+       LINKS
+    ================================================== */
 
     .link-block {
       display: block;
@@ -261,12 +253,18 @@
       word-break: break-word;
     }
 
-    /* MESSAGES */
+    /* ==================================================
+       MESSAGES
+    ================================================== */
 
     .message {
       padding: 40px 0;
       color: #999;
     }
+
+    /* ==================================================
+       LOAD MORE
+    ================================================== */
 
     .load-more {
       display: block;
@@ -289,7 +287,85 @@
       color: #111;
     }
 
-    /* MOBILE */
+    /* ==================================================
+       SCROLL TO TOP
+       BOTTOM CENTER
+    ================================================== */
+
+    .scroll-top {
+      position: fixed;
+
+      /*
+       * Center horizontally.
+       */
+      left: 50%;
+
+      /*
+       * Move the button back by half
+       * of its own width.
+       */
+      transform:
+        translateX(-50%)
+        translateY(6px);
+
+      /*
+       * Position at bottom center.
+       */
+      bottom: 16px;
+
+      z-index: 200;
+
+      border: 0;
+
+      padding:
+        6px 8px;
+
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          0.96
+        );
+
+      color: #888;
+
+      font-family: inherit;
+      font-size: 11px;
+
+      cursor: pointer;
+
+      /*
+       * Hidden initially.
+       */
+      opacity: 0;
+      visibility: hidden;
+
+      transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    /*
+     * Visible after scrolling down.
+     */
+    .scroll-top.visible {
+      opacity: 1;
+      visibility: visible;
+
+      transform:
+        translateX(-50%)
+        translateY(0);
+    }
+
+    .scroll-top:hover {
+      color: #111;
+    }
+
+    /* ==================================================
+       MOBILE
+    ================================================== */
 
     @media (
       max-width: 800px
@@ -318,12 +394,8 @@
           10px 12px 7px;
       }
 
-      /*
-       * Mobile channel navigation.
-       *
-       * Still ONE LINE.
-       * Extra channels can be swiped horizontally.
-       */
+      /* MOBILE CHANNEL NAVIGATION */
+
       nav {
         padding-left: 12px;
         padding-right: 12px;
@@ -370,6 +442,14 @@
 
         gap:
           16px 10px;
+      }
+
+      /* MOBILE SCROLL TO TOP */
+
+      .scroll-top {
+        bottom: 12px;
+
+        font-size: 11px;
       }
 
     }
@@ -427,6 +507,17 @@
     style="display:none"
   >
     load more
+  </button>
+
+
+  <!-- SCROLL TO TOP -->
+
+  <button
+    class="scroll-top"
+    id="scrollTop"
+    aria-label="Scroll to top"
+  >
+    ↑ top
   </button>
 
 </main>
@@ -1275,9 +1366,7 @@ function createBlock(
     "block";
 
 
-  /* -----------------------------------------------
-     IMAGE
-  ------------------------------------------------ */
+  /* IMAGE */
 
   if (
     block.type ===
@@ -1386,9 +1475,7 @@ function createBlock(
   }
 
 
-  /* -----------------------------------------------
-     TEXT
-  ------------------------------------------------ */
+  /* TEXT */
 
   if (
     block.type ===
@@ -1420,9 +1507,7 @@ function createBlock(
   }
 
 
-  /* -----------------------------------------------
-     LINK
-  ------------------------------------------------ */
+  /* LINK */
 
   if (
     block.type ===
@@ -1548,9 +1633,7 @@ function createBlock(
   }
 
 
-  /* -----------------------------------------------
-     ATTACHMENT / VIDEO
-  ------------------------------------------------ */
+  /* ATTACHMENT / VIDEO */
 
   if (
     block.type ===
@@ -1825,9 +1908,7 @@ function createBlock(
   }
 
 
-  /* -----------------------------------------------
-     EMBED
-  ------------------------------------------------ */
+  /* EMBED */
 
   if (
     block.type ===
@@ -2191,6 +2272,55 @@ async function refreshCurrentChannel() {
   }
 
 }
+
+
+/* ==================================================
+   SCROLL TO TOP
+================================================== */
+
+const scrollTopButton =
+  document.getElementById(
+    "scrollTop"
+  );
+
+
+window.addEventListener(
+  "scroll",
+  function() {
+
+    if (
+      window.scrollY > 400
+    ) {
+
+      scrollTopButton.classList.add(
+        "visible"
+      );
+
+    }
+
+    else {
+
+      scrollTopButton.classList.remove(
+        "visible"
+      );
+
+    }
+
+  }
+);
+
+
+scrollTopButton.addEventListener(
+  "click",
+  function() {
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  }
+);
 
 
 /* ==================================================
