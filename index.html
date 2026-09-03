@@ -89,6 +89,7 @@
       overflow-y: hidden;
 
       flex-wrap: nowrap;
+
       white-space: nowrap;
 
       -webkit-overflow-scrolling: touch;
@@ -287,33 +288,37 @@
     }
 
     /* ==================================================
-       SCROLL TO TOP BUTTON
+       SCROLL TO TOP
     ================================================== */
 
-    .scroll-top {
+    #scrollTop {
+
       position: fixed;
 
       left: 50%;
-
-      bottom: 16px;
-
-      z-index: 200;
+      bottom: 15px;
 
       transform:
         translateX(-50%)
-        translateY(6px);
+        translateY(8px);
+
+      z-index: 999999;
+
+      display: block;
 
       border: 0;
 
       padding:
-        6px 8px;
+        5px 8px;
+
+      margin: 0;
 
       background:
         rgba(
           255,
           255,
           255,
-          0.96
+          0.95
         );
 
       color: #888;
@@ -321,29 +326,45 @@
       font-family: inherit;
       font-size: 11px;
 
+      line-height: 1;
+
       cursor: pointer;
 
       opacity: 0;
+
       visibility: hidden;
 
+      pointer-events: none;
+
       transition:
-        opacity 0.2s ease,
-        visibility 0.2s ease,
-        transform 0.2s ease;
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        visibility 0.18s ease;
+
     }
 
-    .scroll-top.visible {
+
+    #scrollTop.visible {
+
       opacity: 1;
+
       visibility: visible;
+
+      pointer-events: auto;
 
       transform:
         translateX(-50%)
         translateY(0);
+
     }
 
-    .scroll-top:hover {
+
+    #scrollTop:hover {
+
       color: #111;
+
     }
+
 
     /* ==================================================
        MOBILE
@@ -363,6 +384,7 @@
 
     }
 
+
     @media (
       max-width: 550px
     ) {
@@ -371,12 +393,8 @@
         font-size: 12px;
       }
 
-      .top {
-        padding:
-          10px 12px 7px;
-      }
-
       nav {
+
         padding-left: 12px;
         padding-right: 12px;
 
@@ -385,35 +403,30 @@
         gap: 13px;
 
         overflow-x: auto;
-        overflow-y: hidden;
 
         flex-wrap: nowrap;
 
         white-space: nowrap;
 
-        -webkit-overflow-scrolling: touch;
-
-        scrollbar-width: none;
-      }
-
-      nav::-webkit-scrollbar {
-        display: none;
       }
 
       nav button {
+
         flex: 0 0 auto;
 
         font-size: 12px;
 
-        white-space: nowrap;
       }
 
       main {
+
         padding:
           14px 12px 50px;
+
       }
 
       .grid {
+
         grid-template-columns:
           repeat(
             2,
@@ -422,11 +435,13 @@
 
         gap:
           16px 10px;
+
       }
 
-      .scroll-top {
+      #scrollTop {
+
         bottom: 12px;
-        font-size: 11px;
+
       }
 
     }
@@ -479,23 +494,23 @@
 
 
   <button
-    class="load-more"
     id="loadMore"
+    class="load-more"
     style="display:none"
   >
     load more
   </button>
 
-
-  <button
-    class="scroll-top"
-    id="scrollTop"
-    aria-label="Scroll to top"
-  >
-    ↑ top
-  </button>
-
 </main>
+
+
+<button
+  id="scrollTop"
+  type="button"
+  aria-label="Scroll to top"
+>
+  ↑ top
+</button>
 
 
 <script>
@@ -515,6 +530,15 @@ const PER_PAGE =
 
 const REFRESH_INTERVAL =
   5 * 60 * 1000;
+
+
+/*
+ * The button appears after approximately
+ * 60 pixels of vertical scrolling.
+ */
+
+const SCROLL_THRESHOLD =
+  60;
 
 
 /* ==================================================
@@ -2223,29 +2247,63 @@ async function refreshCurrentChannel() {
    SCROLL TO TOP
 ================================================== */
 
-/*
- * Button appears after approximately
- * 60px of scrolling inside the iframe.
- */
-
-const SCROLL_THRESHOLD =
-  60;
-
-
 const scrollTopButton =
   document.getElementById(
     "scrollTop"
   );
 
 
-window.addEventListener(
-  "scroll",
-  function() {
+/*
+ * Get the most reliable scroll position
+ * available inside the iframe.
+ */
 
-    if (
-      window.scrollY >
-      SCROLL_THRESHOLD
-    ) {
+function getScrollPosition() {
+
+  return Math.max(
+    window.scrollY || 0,
+    window.pageYOffset || 0,
+    document.documentElement.scrollTop || 0,
+    document.body.scrollTop || 0
+  );
+
+}
+
+
+/*
+ * Show/hide button.
+ *
+ * This runs continuously using
+ * requestAnimationFrame so it does not
+ * depend entirely on Readymag firing
+ * normal scroll events.
+ */
+
+let lastButtonState =
+  false;
+
+
+function updateScrollButton() {
+
+  const position =
+    getScrollPosition();
+
+
+  const shouldShow =
+    position >=
+    SCROLL_THRESHOLD;
+
+
+  if (
+    shouldShow !==
+    lastButtonState
+  ) {
+
+    lastButtonState =
+      shouldShow;
+
+
+    if (shouldShow) {
 
       scrollTopButton.classList.add(
         "visible"
@@ -2261,7 +2319,34 @@ window.addEventListener(
 
     }
 
-  },
+  }
+
+
+  requestAnimationFrame(
+    updateScrollButton
+  );
+
+}
+
+
+/*
+ * Start the continuous scroll check.
+ */
+
+requestAnimationFrame(
+  updateScrollButton
+);
+
+
+/*
+ * Also listen for normal scroll events.
+ * This makes the response immediate in
+ * browsers that fire the event normally.
+ */
+
+window.addEventListener(
+  "scroll",
+  updateScrollButton,
   {
     passive: true
   }
@@ -2269,7 +2354,7 @@ window.addEventListener(
 
 
 /*
- * Scroll the iframe itself to the top.
+ * Scroll the iframe to its own top.
  */
 
 function scrollIframeToTop() {
@@ -2279,53 +2364,116 @@ function scrollIframeToTop() {
     behavior: "smooth"
   });
 
+
+  document.documentElement.scrollTop =
+    0;
+
+  document.body.scrollTop =
+    0;
+
 }
 
 
 /*
- * Tell the Readymag parent page
- * to scroll all the way to the top.
+ * Ask the Readymag parent page to scroll
+ * to the absolute top.
+ *
+ * We send this more than once because
+ * Readymag may be handling its own
+ * scrolling/layout at the same time.
  */
 
-function scrollParentToTop() {
+function askReadymagToScrollTop() {
 
-  try {
+  const message = {
 
-    window.parent.postMessage(
-      {
-        type:
-          "ARENA_SCROLL_PARENT_TO_TOP"
-      },
-      "*"
-    );
+    type:
+      "ARENA_SCROLL_PARENT_TO_TOP"
 
-  } catch (error) {
+  };
 
-    console.warn(
-      "Could not communicate with parent page:",
-      error
-    );
 
-  }
+  window.parent.postMessage(
+    message,
+    "*"
+  );
+
+
+  setTimeout(
+    function() {
+
+      window.parent.postMessage(
+        message,
+        "*"
+      );
+
+    },
+    100
+  );
+
+
+  setTimeout(
+    function() {
+
+      window.parent.postMessage(
+        message,
+        "*"
+      );
+
+    },
+    300
+  );
+
+
+  setTimeout(
+    function() {
+
+      window.parent.postMessage(
+        message,
+        "*"
+      );
+
+    },
+    600
+  );
 
 }
 
 
 /*
- * When clicked:
- *
- * 1. Scroll iframe to its own top.
- * 2. Tell Readymag to scroll its
- *    entire page to the very top.
+ * BUTTON CLICK
  */
 
 scrollTopButton.addEventListener(
   "click",
   function() {
 
+    /*
+     * Immediately hide the button.
+     */
+
+    scrollTopButton.classList.remove(
+      "visible"
+    );
+
+
+    lastButtonState =
+      false;
+
+
+    /*
+     * Scroll the Are.na iframe itself.
+     */
+
     scrollIframeToTop();
 
-    scrollParentToTop();
+
+    /*
+     * Tell Readymag to scroll its
+     * entire page to the top.
+     */
+
+    askReadymagToScrollTop();
 
   }
 );
