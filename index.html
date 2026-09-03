@@ -12,22 +12,18 @@
 
   <title>emy</title>
 
-
   <style>
 
     * {
       box-sizing: border-box;
     }
 
-
     html {
       scroll-behavior: smooth;
     }
 
-
     body {
       margin: 0;
-
       background: #fff;
       color: #111;
 
@@ -40,19 +36,16 @@
       line-height: 1.35;
     }
 
-
     a {
       color: inherit;
       text-decoration: none;
     }
-
 
     /* HEADER */
 
     header {
       position: sticky;
       top: 0;
-
       z-index: 100;
 
       background: rgba(
@@ -66,95 +59,72 @@
         1px solid #ddd;
     }
 
-
     .top {
       display: none;
     }
-
 
     .status {
       color: #999;
       font-size: 11px;
     }
 
-
     /* CHANNEL NAV */
 
     nav {
-
       display: flex;
-
       gap: 16px;
 
       padding:
         12px 16px;
 
       overflow-x: auto;
-
       white-space: nowrap;
 
       scrollbar-width: none;
     }
 
-
     nav::-webkit-scrollbar {
       display: none;
     }
 
-
     nav button {
-
       border: 0;
 
       padding: 0;
       margin: 0;
 
       background: transparent;
-
       color: #999;
 
       font-family: inherit;
-
       font-size: 13px;
 
       cursor: pointer;
     }
 
-
     nav button:hover,
     nav button.active {
-
       color: #111;
-
     }
-
 
     /* MAIN */
 
     main {
-
       padding:
         18px 16px 60px;
-
     }
 
-
     .channel-title {
-
       margin:
         0 0 20px;
 
       font-size: 13px;
-
       font-weight: normal;
-
     }
-
 
     /* GRID */
 
     .grid {
-
       display: grid;
 
       grid-template-columns:
@@ -167,124 +137,103 @@
         20px 16px;
 
       align-items: start;
-
     }
-
 
     /* BLOCK */
 
     .block {
-
       min-width: 0;
-
     }
 
-
     .block img {
-
       display: block;
 
       width: 100%;
+      height: auto;
 
+      background: #f5f5f5;
+    }
+
+    /* VIDEO */
+
+    .video-link {
+      display: block;
+      cursor: pointer;
+    }
+
+    .block video {
+      display: block;
+
+      width: 100%;
       height: auto;
 
       background: #f5f5f5;
 
+      object-fit: contain;
+
+      /*
+       * Prevents the browser from showing
+       * a video control interface.
+       */
+
+      pointer-events: none;
     }
-.block video {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: #f5f5f5;
-  object-fit: cover;
-}
-
-.video-link {
-  display: block;
-  cursor: pointer;
-}
-
 
     /* CAPTION */
 
     .caption {
-
       margin-top: 6px;
 
       color: #777;
-
       font-size: 11px;
-
     }
-
 
     /* TEXT */
 
     .text-block {
-
       padding: 12px;
 
       background: #f4f4f4;
 
       white-space: pre-wrap;
-
     }
-
 
     /* LINKS */
 
     .link-block {
-
       display: block;
 
       border-top:
         1px solid #ccc;
 
       padding-top: 7px;
-
     }
-
 
     .link-block img {
-
       margin-bottom: 7px;
-
     }
-
 
     .link-title {
-
       font-size: 13px;
-
     }
 
-
     .link-url {
-
       margin-top: 3px;
 
       color: #999;
-
       font-size: 11px;
 
       word-break: break-word;
-
     }
-
 
     /* MESSAGES */
 
     .message {
-
       padding: 40px 0;
-
       color: #999;
-
     }
 
-
     .load-more {
-
       display: block;
 
       margin:
@@ -293,24 +242,17 @@
       border: 0;
 
       background: transparent;
-
       color: #888;
 
       font-family: inherit;
-
       font-size: 12px;
 
       cursor: pointer;
-
     }
-
 
     .load-more:hover {
-
       color: #111;
-
     }
-
 
     /* MOBILE */
 
@@ -319,17 +261,14 @@
     ) {
 
       .grid {
-
         grid-template-columns:
           repeat(
             3,
             minmax(0, 1fr)
           );
-
       }
 
     }
-
 
     @media (
       max-width: 550px
@@ -339,42 +278,30 @@
         font-size: 12px;
       }
 
-
       .top {
-
         padding:
           10px 12px 7px;
-
       }
 
-
       nav {
-
         padding-left: 12px;
         padding-right: 12px;
 
         padding-bottom: 10px;
 
         gap: 13px;
-
       }
-
 
       nav button {
         font-size: 12px;
       }
 
-
       main {
-
         padding:
           14px 12px 50px;
-
       }
 
-
       .grid {
-
         grid-template-columns:
           repeat(
             2,
@@ -383,7 +310,6 @@
 
         gap:
           16px 10px;
-
       }
 
     }
@@ -448,34 +374,18 @@
 
 <script>
 
-
 /* ==================================================
    SETTINGS
 ================================================== */
 
-
 const USER =
   "emy-fuplg6fvywk";
-
 
 const API =
   "https://api.are.na/v3";
 
-
-/*
- * Are.na allows up to 100 items per page.
- */
-
-const PER_PAGE = 100;
-
-
-/*
- * Automatically refresh the currently
- * displayed content every 5 minutes.
- *
- * This matches the caching behaviour of
- * unauthenticated Are.na API responses.
- */
+const PER_PAGE =
+  100;
 
 const REFRESH_INTERVAL =
   5 * 60 * 1000;
@@ -484,7 +394,6 @@ const REFRESH_INTERVAL =
 /* ==================================================
    STATE
 ================================================== */
-
 
 let channels = [];
 
@@ -498,12 +407,6 @@ let loading = false;
 
 let refreshTimer = null;
 
-
-/*
- * Prevent old API responses from rendering
- * after the user has clicked another channel.
- */
-
 let viewRequestId = 0;
 
 
@@ -511,14 +414,12 @@ let viewRequestId = 0;
    API REQUEST
 ================================================== */
 
-
 async function request(url) {
 
   const response =
     await fetch(url, {
       cache: "no-cache"
     });
-
 
   if (!response.ok) {
 
@@ -529,7 +430,6 @@ async function request(url) {
 
   }
 
-
   return response.json();
 
 }
@@ -539,21 +439,11 @@ async function request(url) {
    LOAD YOUR CREATED CHANNELS
 ================================================== */
 
-
 async function loadChannels() {
 
   try {
 
     setStatus("loading…");
-
-
-    /*
-     * Get all content created by you,
-     * then keep only Channel objects.
-     *
-     * We paginate this because Are.na's
-     * user-content endpoint is paginated.
-     */
 
     let page = 1;
 
@@ -592,20 +482,12 @@ async function loadChannels() {
     }
 
 
-    /*
-     * Keep only channels.
-     */
-
     channels =
       everything.filter(
         item =>
           item.type === "Channel"
       );
 
-
-    /*
-     * Remove duplicate channels.
-     */
 
     const ids =
       new Set();
@@ -624,17 +506,16 @@ async function loadChannels() {
           }
 
 
-          ids.add(channel.id);
+          ids.add(
+            channel.id
+          );
+
 
           return true;
 
         }
       );
 
-
-    /*
-     * Alphabetical navigation.
-     */
 
     channels.sort(
       (a, b) =>
@@ -646,20 +527,10 @@ async function loadChannels() {
 
     buildNav();
 
-
     setStatus("");
 
 
-    /*
-     * Start with ALL.
-     */
-
     await showAll();
-
-
-    /*
-     * Start automatic syncing.
-     */
 
     startAutoRefresh();
 
@@ -671,9 +542,7 @@ async function loadChannels() {
       error
     );
 
-
     setStatus("");
-
 
     showError(
       "Couldn't load your channels."
@@ -688,7 +557,6 @@ async function loadChannels() {
    BUILD NAVIGATION
 ================================================== */
 
-
 function buildNav() {
 
   const nav =
@@ -699,10 +567,6 @@ function buildNav() {
 
   nav.innerHTML = "";
 
-
-  /*
-   * ALL
-   */
 
   const all =
     document.createElement(
@@ -731,10 +595,6 @@ function buildNav() {
     all
   );
 
-
-  /*
-   * CHANNELS
-   */
 
   channels.forEach(
     channel => {
@@ -774,7 +634,6 @@ function buildNav() {
    ACTIVE NAVIGATION
 ================================================== */
 
-
 function setActive(id) {
 
   document
@@ -813,7 +672,6 @@ function setActive(id) {
    FETCH ONE CHANNEL — ALL PAGES
 ================================================== */
 
-
 async function fetchAllChannelBlocks(
   channel
 ) {
@@ -840,10 +698,6 @@ async function fetchAllChannelBlocks(
     }
 
 
-    /*
-     * Stop when there are no more pages.
-     */
-
     if (
       !result.meta ||
       !result.meta.has_more_pages
@@ -867,7 +721,6 @@ async function fetchAllChannelBlocks(
 /* ==================================================
    SHOW ALL
 ================================================== */
-
 
 async function showAll(
   preserveScroll = false
@@ -910,14 +763,6 @@ async function showAll(
 
   try {
 
-    /*
-     * Fetch every page from every channel.
-     *
-     * Promise.all means the channels are
-     * fetched in parallel rather than one
-     * after another.
-     */
-
     const results =
       await Promise.all(
 
@@ -941,12 +786,6 @@ async function showAll(
       );
 
 
-    /*
-     * If the user clicked another channel
-     * while this request was running,
-     * don't overwrite that newer view.
-     */
-
     if (
       requestId !== viewRequestId
     ) {
@@ -959,19 +798,11 @@ async function showAll(
     let blocks = [];
 
 
-    /*
-     * Combine all channel contents.
-     */
-
     results.forEach(
       result => {
 
         result.blocks.forEach(
           block => {
-
-            /*
-             * Don't render nested channels.
-             */
 
             if (
               block.type === "Channel"
@@ -997,13 +828,6 @@ async function showAll(
       }
     );
 
-
-    /*
-     * Remove duplicate blocks.
-     *
-     * The same Are.na block can be connected
-     * to several channels.
-     */
 
     const seen =
       new Set();
@@ -1032,13 +856,6 @@ async function showAll(
         }
       );
 
-
-    /*
-     * Sort newest first.
-     *
-     * Prefer created_at because "all"
-     * represents your additions.
-     */
 
     blocks.sort(
       (a, b) => {
@@ -1102,7 +919,6 @@ async function showAll(
 /* ==================================================
    SHOW CHANNEL
 ================================================== */
-
 
 async function showChannel(
   channel
@@ -1198,7 +1014,6 @@ async function showChannel(
    LOAD CHANNEL CONTENT
 ================================================== */
 
-
 async function loadChannelPage(
   channel,
   page,
@@ -1232,10 +1047,6 @@ async function loadChannelPage(
     const result =
       await request(url);
 
-
-    /*
-     * Don't render stale responses.
-     */
 
     if (
       requestId !== viewRequestId
@@ -1290,7 +1101,6 @@ async function loadChannelPage(
    LOAD MORE
 ================================================== */
 
-
 document
   .getElementById(
     "loadMore"
@@ -1321,19 +1131,8 @@ document
     );
 
 
-    if (hasMore) {
-
-      this.textContent =
-        "load more";
-
-    }
-
-    else {
-
-      this.textContent =
-        "load more";
-
-    }
+    this.textContent =
+      "load more";
 
   };
 
@@ -1341,7 +1140,6 @@ document
 /* ==================================================
    RENDER
 ================================================== */
-
 
 function render(
   blocks,
@@ -1401,15 +1199,6 @@ function render(
 /* ==================================================
    CREATE BLOCK
 ================================================== */
-function createBlock(block) {
-
-  console.log("ARE.NA BLOCK:", block);
-
-  const wrapper =
-    document.createElement(
-      "div"
-    );
-
 
 function createBlock(
   block
@@ -1442,12 +1231,6 @@ function createBlock(
 
 
     if (!imageUrl) {
-
-      console.warn(
-        "Image without URL:",
-        block
-      );
-
 
       return null;
 
@@ -1498,12 +1281,6 @@ function createBlock(
 
     image.onerror =
       function() {
-
-        console.warn(
-          "Image failed:",
-          imageUrl
-        );
-
 
         wrapper.remove();
 
@@ -1710,306 +1487,259 @@ function createBlock(
   }
 
 
- /* -----------------------------------------------
-   ATTACHMENT / VIDEO
------------------------------------------------- */
-
-if (
-  block.type ===
-  "Attachment"
-) {
-
-  /*
-   * Are.na attachments can contain videos.
-   *
-   * Try to find the actual file URL from the
-   * attachment object.
-   */
-
-  const attachmentUrl =
-    block.attachment?.url ||
-    block.url ||
-    block.attachment?.file_url;
-
-
-  /*
-   * Detect common video formats.
-   */
-
-  const isVideo =
-    attachmentUrl &&
-    /\.(mp4|webm|mov|m4v|ogv)(\?.*)?$/i.test(
-      attachmentUrl
-    );
-
-
   /* -----------------------------------------------
-     VIDEO
+     ATTACHMENT / VIDEO
   ------------------------------------------------ */
 
-  if (isVideo) {
+  if (
+    block.type ===
+    "Attachment"
+  ) {
 
     /*
-     * Clicking the video goes to the original
-     * Are.na block rather than the video file.
-     */
-
-    const link =
-      document.createElement(
-        "a"
-      );
-
-
-    link.className =
-      "video-link";
-
-
-    link.href =
-      `https://www.are.na/block/${block.id}`;
-
-
-    link.target =
-      "_blank";
-
-
-    link.rel =
-      "noopener noreferrer";
-
-
-    const video =
-      document.createElement(
-        "video"
-      );
-
-
-    video.src =
-      attachmentUrl;
-
-
-    /*
-     * Autoplay requirements:
+     * Find the attachment URL.
      *
-     * muted  = browsers allow autoplay
-     * loop   = video repeats forever
-     * playsinline = prevents fullscreen takeover
-     * autoplay = starts automatically
+     * Are.na attachments may expose their
+     * file URL in different fields, so we
+     * check the common possibilities.
      */
 
-    video.autoplay =
-      true;
-
-
-    video.muted =
-      true;
-
-
-    video.loop =
-      true;
-
-
-    video.playsInline =
-      true;
-
-
-    video.setAttribute(
-      "autoplay",
-      ""
-    );
-
-
-    video.setAttribute(
-      "muted",
-      ""
-    );
-
-
-    video.setAttribute(
-      "loop",
-      ""
-    );
-
-
-    video.setAttribute(
-      "playsinline",
-      ""
-    );
+    const attachmentUrl =
+      block.attachment?.url ||
+      block.attachment?.file_url ||
+      block.url ||
+      block.original?.url;
 
 
     /*
-     * Don't show browser video controls.
-     * The video itself is the visual object.
+     * Are.na also provides the MIME type.
+     *
+     * This is more reliable than looking only
+     * at the filename extension.
      */
 
-    video.controls =
-      false;
+    const contentType =
+      block.content_type ||
+      block.attachment?.content_type ||
+      "";
 
 
-    /*
-     * If autoplay is blocked for any reason,
-     * try starting playback once the element
-     * has been added to the page.
-     */
-
-    video.addEventListener(
-      "canplay",
-      function() {
-
-        video.play().catch(
-          function(error) {
-
-            console.log(
-              "Autoplay prevented:",
-              error
-            );
-
-          }
-        );
-
-      }
-    );
+    const isVideo =
+      contentType.startsWith("video/") ||
+      (
+        attachmentUrl &&
+        /\.(mp4|webm|mov|m4v|ogv)(\?.*)?$/i.test(
+          attachmentUrl
+        )
+      );
 
 
-    link.appendChild(
-      video
-    );
+    /* -----------------------------------------------
+       VIDEO
+    ------------------------------------------------ */
 
+    if (
+      isVideo &&
+      attachmentUrl
+    ) {
 
-    wrapper.appendChild(
-      link
-    );
+      /*
+       * The link points to the ARE.NA BLOCK.
+       *
+       * The video source itself is separate.
+       */
 
-
-    /*
-     * Optional title/caption.
-     */
-
-    if (block.title) {
-
-      const caption =
+      const link =
         document.createElement(
-          "div"
+          "a"
         );
 
 
-      caption.className =
-        "caption";
+      link.className =
+        "video-link";
 
 
-      caption.textContent =
-        block.title;
+      link.href =
+        `https://www.are.na/block/${block.id}`;
+
+
+      link.target =
+        "_blank";
+
+
+      link.rel =
+        "noopener noreferrer";
+
+
+      const video =
+        document.createElement(
+          "video"
+        );
+
+
+      video.src =
+        attachmentUrl;
+
+
+      /*
+       * AUTOPLAY
+       */
+
+      video.autoplay =
+        true;
+
+
+      /*
+       * Required by browsers for
+       * reliable autoplay.
+       */
+
+      video.muted =
+        true;
+
+
+      /*
+       * Repeat forever.
+       */
+
+      video.loop =
+        true;
+
+
+      /*
+       * Keep video inline on phones.
+       */
+
+      video.playsInline =
+        true;
+
+
+      /*
+       * Explicit HTML attributes.
+       * These help with autoplay in
+       * different browsers.
+       */
+
+      video.setAttribute(
+        "autoplay",
+        ""
+      );
+
+
+      video.setAttribute(
+        "muted",
+        ""
+      );
+
+
+      video.setAttribute(
+        "loop",
+        ""
+      );
+
+
+      video.setAttribute(
+        "playsinline",
+        ""
+      );
+
+
+      /*
+       * No controls.
+       */
+
+      video.controls =
+        false;
+
+
+      /*
+       * Try to start playback as soon
+       * as the video is ready.
+       */
+
+      video.addEventListener(
+        "canplay",
+        function() {
+
+          video.play().catch(
+            function() {
+
+              /*
+               * Some browsers may still
+               * delay autoplay until the
+               * element is visible.
+               */
+
+            }
+          );
+
+        }
+      );
+
+
+      /*
+       * If the video fails, remove it
+       * rather than leaving a broken box.
+       */
+
+      video.addEventListener(
+        "error",
+        function() {
+
+          console.warn(
+            "Video failed:",
+            attachmentUrl
+          );
+
+        }
+      );
+
+
+      link.appendChild(
+        video
+      );
 
 
       wrapper.appendChild(
-        caption
+        link
       );
+
+
+      /*
+       * Optional caption.
+       */
+
+      if (block.title) {
+
+        const caption =
+          document.createElement(
+            "div"
+          );
+
+
+        caption.className =
+          "caption";
+
+
+        caption.textContent =
+          block.title;
+
+
+        wrapper.appendChild(
+          caption
+        );
+
+      }
+
+
+      return wrapper;
 
     }
 
 
-    return wrapper;
-
-  }
-
-
-  /* -----------------------------------------------
-     NORMAL ATTACHMENT
-  ------------------------------------------------ */
-
-  const link =
-    document.createElement(
-      "a"
-    );
-
-
-  link.className =
-    "link-block";
-
-
-  link.href =
-    block.url ||
-    `https://www.are.na/block/${block.id}`;
-
-
-  link.target =
-    "_blank";
-
-
-  link.rel =
-    "noopener noreferrer";
-
-
-  const imageUrl =
-    block.image?.large?.src ||
-    block.image?.medium?.src ||
-    block.image?.small?.src ||
-    block.image?.src;
-
-
-  if (imageUrl) {
-
-    const image =
-      document.createElement(
-        "img"
-      );
-
-
-    image.src =
-      imageUrl;
-
-
-    image.loading =
-      "lazy";
-
-
-    image.decoding =
-      "async";
-
-
-    image.onerror =
-      function() {
-
-        image.style.display =
-          "none";
-
-      };
-
-
-    link.appendChild(
-      image
-    );
-
-  }
-
-
-  const title =
-    document.createElement(
-      "div"
-    );
-
-
-  title.className =
-    "link-title";
-
-
-  title.textContent =
-    block.title ||
-    block.filename ||
-    "attachment";
-
-
-  link.appendChild(
-    title
-  );
-
-
-  wrapper.appendChild(
-    link
-  );
-
-
-  return wrapper;
-
-}
+    /* -----------------------------------------------
+       NORMAL ATTACHMENT
+    ------------------------------------------------ */
 
     const link =
       document.createElement(
@@ -2059,6 +1789,15 @@ if (
 
       image.decoding =
         "async";
+
+
+      image.onerror =
+        function() {
+
+          image.style.display =
+            "none";
+
+        };
 
 
       link.appendChild(
@@ -2205,7 +1944,6 @@ if (
    RESET
 ================================================== */
 
-
 function reset() {
 
   document.getElementById(
@@ -2233,7 +1971,6 @@ function reset() {
 /* ==================================================
    LOADING
 ================================================== */
-
 
 function showLoading() {
 
@@ -2270,7 +2007,6 @@ function clearLoading() {
    ERROR
 ================================================== */
 
-
 function showError(
   message
 ) {
@@ -2288,7 +2024,6 @@ function showError(
 /* ==================================================
    LOAD MORE UI
 ================================================== */
-
 
 function updateLoadMore() {
 
@@ -2322,7 +2057,6 @@ function updateLoadMore() {
    STATUS
 ================================================== */
 
-
 function setStatus(
   text
 ) {
@@ -2339,12 +2073,7 @@ function setStatus(
    AUTOMATIC REFRESH
 ================================================== */
 
-
 function startAutoRefresh() {
-
-  /*
-   * Don't create multiple timers.
-   */
 
   if (refreshTimer) {
 
@@ -2358,15 +2087,6 @@ function startAutoRefresh() {
   refreshTimer =
     setInterval(
       async function() {
-
-        /*
-         * Only refresh if the page is
-         * currently visible.
-         *
-         * This avoids unnecessary API
-         * requests when the browser tab
-         * is in the background.
-         */
 
         if (
           document.visibilityState !==
@@ -2387,19 +2107,11 @@ function startAutoRefresh() {
           currentChannel
         ) {
 
-          /*
-           * Refresh the current channel.
-           */
-
           await refreshCurrentChannel();
 
         }
 
         else {
-
-          /*
-           * Refresh ALL.
-           */
 
           await showAll(true);
 
@@ -2415,7 +2127,6 @@ function startAutoRefresh() {
 /* ==================================================
    REFRESH CURRENT CHANNEL
 ================================================== */
-
 
 async function refreshCurrentChannel() {
 
@@ -2434,14 +2145,6 @@ async function refreshCurrentChannel() {
 
 
   try {
-
-    /*
-     * Refresh from page 1.
-     *
-     * We deliberately don't clear the
-     * existing grid until the new data
-     * has successfully arrived.
-     */
 
     const result =
       await request(
@@ -2507,9 +2210,7 @@ async function refreshCurrentChannel() {
    START
 ================================================== */
 
-
 loadChannels();
-
 
 </script>
 
