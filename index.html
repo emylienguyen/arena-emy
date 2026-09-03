@@ -51,12 +51,13 @@
       top: 0;
       z-index: 100;
 
-      background: rgba(
-        255,
-        255,
-        255,
-        0.96
-      );
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          0.96
+        );
 
       border-bottom:
         1px solid #ddd;
@@ -77,7 +78,6 @@
     ================================================== */
 
     nav {
-
       display: flex;
 
       gap: 16px;
@@ -85,41 +85,17 @@
       padding:
         12px 16px;
 
-      /*
-       * IMPORTANT:
-       * Keep every channel on one line.
-       */
-
       flex-wrap: nowrap;
 
       white-space: nowrap;
 
-      /*
-       * Horizontal scrolling when
-       * channels no longer fit.
-       */
-
       overflow-x: auto;
       overflow-y: hidden;
-
-      /*
-       * Smooth scrolling on touch devices.
-       */
 
       -webkit-overflow-scrolling:
         touch;
 
-      /*
-       * Hide scrollbar.
-       */
-
       scrollbar-width: none;
-
-      /*
-       * Prevent accidental vertical
-       * movement while swiping
-       * horizontally.
-       */
 
       overscroll-behavior-x:
         contain;
@@ -130,12 +106,6 @@
     }
 
     nav button {
-
-      /*
-       * Prevent channel names from
-       * shrinking or wrapping.
-       */
-
       flex:
         0 0 auto;
 
@@ -171,7 +141,6 @@
     }
 
     .channel-title {
-
       margin:
         0 0 20px;
 
@@ -181,7 +150,7 @@
 
 
     /* ==================================================
-       GRID
+       MASONRY GRID
     ================================================== */
 
     .grid {
@@ -201,12 +170,34 @@
     }
 
 
+    /*
+     * Each column is a normal vertical
+     * flex stack.
+     *
+     * JavaScript controls which item
+     * goes into which column.
+     */
+
+    .masonry-column {
+
+      min-width: 0;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 20px;
+    }
+
+
     /* ==================================================
        BLOCK
     ================================================== */
 
     .block {
       min-width: 0;
+
+      width: 100%;
     }
 
     .block img {
@@ -290,11 +281,14 @@
 
     .link-block img {
 
+      display: block;
+
+      width: 100%;
+
       margin-bottom: 7px;
     }
 
     .link-title {
-
       font-size: 13px;
     }
 
@@ -347,21 +341,15 @@
     }
 
     .load-more:hover {
-
       color: #111;
     }
 
 
     /* ==================================================
-       SCROLL TO TOP BUTTON
+       SCROLL TO TOP
     ================================================== */
 
     #scrollTop {
-
-      /*
-       * Fixed to the bottom center
-       * of the iframe.
-       */
 
       position: fixed;
 
@@ -373,10 +361,6 @@
         translateX(-50%);
 
       z-index: 999999;
-
-      /*
-       * Hidden initially.
-       */
 
       display: none;
 
@@ -407,13 +391,12 @@
     }
 
     #scrollTop:hover {
-
       color: #111;
     }
 
 
     /* ==================================================
-       MOBILE
+       TABLET
     ================================================== */
 
     @media (
@@ -427,24 +410,28 @@
             3,
             minmax(0, 1fr)
           );
+
+        gap:
+          18px 14px;
+      }
+
+      .masonry-column {
+        gap: 18px;
       }
 
     }
 
+
+    /* ==================================================
+       MOBILE
+    ================================================== */
 
     @media (
       max-width: 550px
     ) {
 
       body {
-
         font-size: 12px;
-      }
-
-      .top {
-
-        padding:
-          10px 12px 7px;
       }
 
       nav {
@@ -463,7 +450,6 @@
       }
 
       nav button {
-
         font-size: 12px;
       }
 
@@ -485,8 +471,11 @@
           16px 10px;
       }
 
-      #scrollTop {
+      .masonry-column {
+        gap: 16px;
+      }
 
+      #scrollTop {
         bottom: 12px;
       }
 
@@ -533,9 +522,7 @@
   >
 
     <div class="message">
-
       loading…
-
     </div>
 
   </div>
@@ -551,10 +538,6 @@
 
 </main>
 
-
-<!-- ==================================================
-     SCROLL TO TOP BUTTON
-================================================== -->
 
 <button
   id="scrollTop"
@@ -583,12 +566,6 @@ const PER_PAGE =
 
 const REFRESH_INTERVAL =
   5 * 60 * 1000;
-
-
-/*
- * Scroll distance before the
- * top button appears.
- */
 
 const SCROLL_THRESHOLD =
   60;
@@ -645,7 +622,7 @@ async function request(url) {
 
 
 /* ==================================================
-   LOAD YOUR CREATED CHANNELS
+   LOAD CHANNELS
 ================================================== */
 
 async function loadChannels() {
@@ -851,7 +828,7 @@ function buildNav() {
 
 
 /* ==================================================
-   ACTIVE NAVIGATION
+   ACTIVE NAV
 ================================================== */
 
 function setActive(id) {
@@ -889,7 +866,7 @@ function setActive(id) {
 
 
 /* ==================================================
-   FETCH ONE CHANNEL — ALL PAGES
+   FETCH ALL CHANNEL BLOCKS
 ================================================== */
 
 async function fetchAllChannelBlocks(
@@ -934,6 +911,229 @@ async function fetchAllChannelBlocks(
 
 
   return blocks;
+
+}
+
+
+/* ==================================================
+   CHRONOLOGICAL SORT
+================================================== */
+
+function sortChronologically(
+  blocks
+) {
+
+  return blocks.sort(
+    (a, b) => {
+
+      const dateA =
+        new Date(
+          a.created_at ||
+          0
+        ).getTime();
+
+
+      const dateB =
+        new Date(
+          b.created_at ||
+          0
+        ).getTime();
+
+
+      /*
+       * Newest first.
+       *
+       * Therefore:
+       *
+       * blocks[0]
+       * = newest
+       * = top-left
+       */
+
+      return dateB -
+        dateA;
+
+    }
+  );
+
+}
+
+
+/* ==================================================
+   COLUMN COUNT
+================================================== */
+
+function getColumnCount() {
+
+  const width =
+    window.innerWidth;
+
+
+  if (
+    width <= 550
+  ) {
+
+    return 2;
+
+  }
+
+
+  if (
+    width <= 800
+  ) {
+
+    return 3;
+
+  }
+
+
+  return 4;
+
+}
+
+
+/* ==================================================
+   CREATE EMPTY COLUMNS
+================================================== */
+
+function createColumns() {
+
+  const grid =
+    document.getElementById(
+      "grid"
+    );
+
+
+  grid.innerHTML =
+    "";
+
+
+  const count =
+    getColumnCount();
+
+
+  const columns = [];
+
+
+  for (
+    let i = 0;
+    i < count;
+    i++
+  ) {
+
+    const column =
+      document.createElement(
+        "div"
+      );
+
+
+    column.className =
+      "masonry-column";
+
+
+    grid.appendChild(
+      column
+    );
+
+
+    columns.push(
+      column
+    );
+
+  }
+
+
+  return columns;
+
+}
+
+
+/* ==================================================
+   RENDER STRICT CHRONOLOGICAL MASONRY
+================================================== */
+
+function renderMasonry(
+  blocks
+) {
+
+  if (!blocks.length) {
+
+    const grid =
+      document.getElementById(
+        "grid"
+      );
+
+
+    grid.innerHTML =
+      `<div class="message">
+        This channel is empty.
+      </div>`;
+
+
+    return;
+
+  }
+
+
+  const columns =
+    createColumns();
+
+
+  /*
+   * IMPORTANT:
+   *
+   * The blocks are already:
+   *
+   * newest → oldest
+   *
+   *
+   * We assign them in strict
+   * sequence:
+   *
+   * 1 → column 1
+   * 2 → column 2
+   * 3 → column 3
+   * 4 → column 4
+   * 5 → column 1
+   * 6 → column 2
+   *
+   *
+   * This means the top row is
+   * always chronological.
+   *
+   * We do NOT put an item into
+   * whichever column happens to
+   * be shortest, because that
+   * would destroy chronological
+   * visual order.
+   */
+
+  blocks.forEach(
+    (block, index) => {
+
+      const element =
+        createBlock(
+          block
+        );
+
+
+      if (!element) {
+        return;
+      }
+
+
+      const columnIndex =
+        index %
+        columns.length;
+
+
+      columns[columnIndex]
+        .appendChild(
+          element
+        );
+
+    }
+  );
 
 }
 
@@ -1053,6 +1253,10 @@ async function showAll(
     );
 
 
+    /*
+     * Remove duplicates.
+     */
+
     const seen =
       new Set();
 
@@ -1083,36 +1287,20 @@ async function showAll(
       );
 
 
-    blocks.sort(
-      (a, b) => {
+    /*
+     * NEWEST → OLDEST
+     */
 
-        const dateA =
-          new Date(
-            a.created_at ||
-            0
-          ).getTime();
-
-
-        const dateB =
-          new Date(
-            b.created_at ||
-            0
-          ).getTime();
-
-
-        return dateB -
-          dateA;
-
-      }
+    sortChronologically(
+      blocks
     );
 
 
     clearLoading();
 
 
-    render(
-      blocks,
-      true
+    renderMasonry(
+      blocks
     );
 
 
@@ -1207,13 +1395,11 @@ async function showChannel(
     }
 
 
-    window.scrollTo(
-      {
-        top: 0,
-        behavior:
-          "smooth"
-      }
-    );
+    window.scrollTo({
+      top: 0,
+      behavior:
+        "smooth"
+    });
 
 
   } catch (error) {
@@ -1244,7 +1430,7 @@ async function showChannel(
 
 
 /* ==================================================
-   LOAD CHANNEL CONTENT
+   LOAD CHANNEL PAGE
 ================================================== */
 
 async function loadChannelPage(
@@ -1267,19 +1453,9 @@ async function loadChannelPage(
 
   try {
 
-    const url =
-      `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`;
-
-
-    console.log(
-      "Loading:",
-      url
-    );
-
-
     const result =
       await request(
-        url
+        `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`
       );
 
 
@@ -1298,17 +1474,26 @@ async function loadChannelPage(
       [];
 
 
+    sortChronologically(
+      blocks
+    );
+
+
     if (replace) {
 
       clearLoading();
 
+      renderMasonry(
+        blocks
+      );
+
+    } else {
+
+      appendBlocks(
+        blocks
+      );
+
     }
-
-
-    render(
-      blocks,
-      replace
-    );
 
 
     hasMore =
@@ -1330,6 +1515,105 @@ async function loadChannelPage(
       false;
 
   }
+
+}
+
+
+/* ==================================================
+   APPEND BLOCKS
+================================================== */
+
+function appendBlocks(
+  blocks
+) {
+
+  const grid =
+    document.getElementById(
+      "grid"
+    );
+
+
+  const columns =
+    Array.from(
+      grid.querySelectorAll(
+        ".masonry-column"
+      )
+    );
+
+
+  if (!columns.length) {
+
+    renderMasonry(
+      blocks
+    );
+
+    return;
+
+  }
+
+
+  /*
+   * When loading another page,
+   * we append the older content
+   * after the existing content.
+   *
+   * This preserves:
+   *
+   * newest → oldest
+   */
+
+  blocks.forEach(
+    block => {
+
+      const element =
+        createBlock(
+          block
+        );
+
+
+      if (!element) {
+        return;
+      }
+
+
+      /*
+       * Find the shortest column
+       * only for APPENDING older
+       * content.
+       *
+       * The initial page remains
+       * strictly chronological.
+       */
+
+      let shortest =
+        columns[0];
+
+
+      for (
+        let i = 1;
+        i < columns.length;
+        i++
+      ) {
+
+        if (
+          columns[i].offsetHeight <
+          shortest.offsetHeight
+        ) {
+
+          shortest =
+            columns[i];
+
+        }
+
+      }
+
+
+      shortest.appendChild(
+        element
+      );
+
+    }
+  );
 
 }
 
@@ -1375,65 +1659,6 @@ document
 
 
 /* ==================================================
-   RENDER
-================================================== */
-
-function render(
-  blocks,
-  replace = false
-) {
-
-  const grid =
-    document.getElementById(
-      "grid"
-    );
-
-
-  if (replace) {
-
-    grid.innerHTML =
-      "";
-
-  }
-
-
-  blocks.forEach(
-    block => {
-
-      const element =
-        createBlock(
-          block
-        );
-
-
-      if (element) {
-
-        grid.appendChild(
-          element
-        );
-
-      }
-
-    }
-  );
-
-
-  if (
-    replace &&
-    !blocks.length
-  ) {
-
-    grid.innerHTML =
-      `<div class="message">
-        This channel is empty.
-      </div>`;
-
-  }
-
-}
-
-
-/* ==================================================
    CREATE BLOCK
 ================================================== */
 
@@ -1451,9 +1676,9 @@ function createBlock(
     "block";
 
 
-  /* -----------------------------------------------
+  /* ==================================================
      IMAGE
-  ------------------------------------------------ */
+  ================================================== */
 
   if (
     block.type ===
@@ -1562,9 +1787,9 @@ function createBlock(
   }
 
 
-  /* -----------------------------------------------
+  /* ==================================================
      TEXT
-  ------------------------------------------------ */
+  ================================================== */
 
   if (
     block.type ===
@@ -1596,9 +1821,9 @@ function createBlock(
   }
 
 
-  /* -----------------------------------------------
+  /* ==================================================
      LINK
-  ------------------------------------------------ */
+  ================================================== */
 
   if (
     block.type ===
@@ -1724,9 +1949,9 @@ function createBlock(
   }
 
 
-  /* -----------------------------------------------
+  /* ==================================================
      ATTACHMENT / VIDEO
-  ------------------------------------------------ */
+  ================================================== */
 
   if (
     block.type ===
@@ -1758,9 +1983,9 @@ function createBlock(
       );
 
 
-    /* -----------------------------------------------
+    /* ==================================================
        VIDEO
-    ------------------------------------------------ */
+    ================================================== */
 
     if (
       isVideo &&
@@ -1855,19 +2080,6 @@ function createBlock(
       );
 
 
-      video.addEventListener(
-        "error",
-        function() {
-
-          console.warn(
-            "Video failed:",
-            attachmentUrl
-          );
-
-        }
-      );
-
-
       link.appendChild(
         video
       );
@@ -1906,9 +2118,9 @@ function createBlock(
     }
 
 
-    /* -----------------------------------------------
+    /* ==================================================
        NORMAL ATTACHMENT
-    ------------------------------------------------ */
+    ================================================== */
 
     const link =
       document.createElement(
@@ -2007,9 +2219,9 @@ function createBlock(
   }
 
 
-  /* -----------------------------------------------
+  /* ==================================================
      EMBED
-    ----------------------------------------------- */
+  ================================================== */
 
   if (
     block.type ===
@@ -2155,19 +2367,14 @@ function showLoading() {
 
 function clearLoading() {
 
-  const messages =
-    document.querySelectorAll(
+  document
+    .querySelectorAll(
       ".message"
+    )
+    .forEach(
+      message =>
+        message.remove()
     );
-
-
-  messages.forEach(
-    message => {
-
-      message.remove();
-
-    }
-  );
 
 }
 
@@ -2210,9 +2417,7 @@ function updateLoadMore() {
     button.style.display =
       "block";
 
-  }
-
-  else {
+  } else {
 
     button.style.display =
       "none";
@@ -2267,20 +2472,13 @@ function startAutoRefresh() {
         }
 
 
-        console.log(
-          "Automatic Are.na refresh…"
-        );
-
-
         if (
           currentChannel
         ) {
 
           await refreshCurrentChannel();
 
-        }
-
-        else {
+        } else {
 
           await showAll(
             true
@@ -2338,19 +2536,13 @@ async function refreshCurrentChannel() {
       [];
 
 
-    const grid =
-      document.getElementById(
-        "grid"
-      );
+    sortChronologically(
+      blocks
+    );
 
 
-    grid.innerHTML =
-      "";
-
-
-    render(
-      blocks,
-      true
+    renderMasonry(
+      blocks
     );
 
 
@@ -2380,7 +2572,7 @@ async function refreshCurrentChannel() {
 
 
 /* ==================================================
-   SCROLL TO TOP BUTTON
+   SCROLL TO TOP
 ================================================== */
 
 const scrollTopButton =
@@ -2388,11 +2580,6 @@ const scrollTopButton =
     "scrollTop"
   );
 
-
-/*
- * Find the actual scroll position
- * of this page.
- */
 
 function getScrollPosition() {
 
@@ -2411,11 +2598,6 @@ function getScrollPosition() {
 }
 
 
-/*
- * Show the button once the user
- * has moved more than 60px.
- */
-
 function updateScrollTopButton() {
 
   const position =
@@ -2430,9 +2612,7 @@ function updateScrollTopButton() {
     scrollTopButton.style.display =
       "block";
 
-  }
-
-  else {
+  } else {
 
     scrollTopButton.style.display =
       "none";
@@ -2441,10 +2621,6 @@ function updateScrollTopButton() {
 
 }
 
-
-/*
- * Normal scroll event.
- */
 
 window.addEventListener(
   "scroll",
@@ -2455,11 +2631,6 @@ window.addEventListener(
 );
 
 
-/*
- * Extra scroll listener for
- * embedded browsers.
- */
-
 document.addEventListener(
   "scroll",
   updateScrollTopButton,
@@ -2469,20 +2640,11 @@ document.addEventListener(
 );
 
 
-/*
- * Small periodic check makes the
- * button more reliable inside an iframe.
- */
-
 setInterval(
   updateScrollTopButton,
   100
 );
 
-
-/*
- * Set initial state.
- */
 
 updateScrollTopButton();
 
@@ -2495,22 +2657,12 @@ scrollTopButton.addEventListener(
   "click",
   function() {
 
-    /*
-     * Scroll the iframe page
-     * completely to the top.
-     */
-
     window.scrollTo({
       top: 0,
       left: 0,
       behavior: "smooth"
     });
 
-
-    /*
-     * Additional fallback for
-     * documentElement scrolling.
-     */
 
     document.documentElement.scrollTo({
       top: 0,
@@ -2519,11 +2671,6 @@ scrollTopButton.addEventListener(
     });
 
 
-    /*
-     * Additional fallback for
-     * body scrolling.
-     */
-
     document.body.scrollTo({
       top: 0,
       left: 0,
@@ -2531,12 +2678,78 @@ scrollTopButton.addEventListener(
     });
 
 
-    /*
-     * Hide immediately.
-     */
-
     scrollTopButton.style.display =
       "none";
+
+  }
+);
+
+
+/* ==================================================
+   RESPONSIVE REBUILD
+================================================== */
+
+let resizeTimer = null;
+
+let previousColumnCount =
+  getColumnCount();
+
+
+window.addEventListener(
+  "resize",
+  function() {
+
+    clearTimeout(
+      resizeTimer
+    );
+
+
+    resizeTimer =
+      setTimeout(
+        async function() {
+
+          const newColumnCount =
+            getColumnCount();
+
+
+          if (
+            newColumnCount ===
+            previousColumnCount
+          ) {
+
+            return;
+
+          }
+
+
+          previousColumnCount =
+            newColumnCount;
+
+
+          /*
+           * Rebuild the current
+           * view so the chronological
+           * order remains correct
+           * after changing column count.
+           */
+
+          if (
+            currentChannel
+          ) {
+
+            await refreshCurrentChannel();
+
+          } else {
+
+            await showAll(
+              true
+            );
+
+          }
+
+        },
+        200
+      );
 
   }
 );
