@@ -41,6 +41,7 @@
       text-decoration: none;
     }
 
+
     /* ==================================================
        HEADER
     ================================================== */
@@ -76,6 +77,7 @@
     ================================================== */
 
     nav {
+
       display: flex;
 
       gap: 16px;
@@ -84,7 +86,8 @@
         12px 16px;
 
       /*
-       * Keep all channels on ONE line.
+       * IMPORTANT:
+       * Keep every channel on one line.
        */
 
       flex-wrap: nowrap;
@@ -92,15 +95,15 @@
       white-space: nowrap;
 
       /*
-       * Allow horizontal scrolling when
-       * there are more channels than fit.
+       * Horizontal scrolling when
+       * channels no longer fit.
        */
 
       overflow-x: auto;
       overflow-y: hidden;
 
       /*
-       * Smooth touch scrolling on phones.
+       * Smooth scrolling on touch devices.
        */
 
       -webkit-overflow-scrolling:
@@ -111,6 +114,15 @@
        */
 
       scrollbar-width: none;
+
+      /*
+       * Prevent accidental vertical
+       * movement while swiping
+       * horizontally.
+       */
+
+      overscroll-behavior-x:
+        contain;
     }
 
     nav::-webkit-scrollbar {
@@ -120,11 +132,12 @@
     nav button {
 
       /*
-       * Prevent individual buttons
-       * from shrinking.
+       * Prevent channel names from
+       * shrinking or wrapping.
        */
 
-      flex: 0 0 auto;
+      flex:
+        0 0 auto;
 
       border: 0;
 
@@ -158,6 +171,7 @@
     }
 
     .channel-title {
+
       margin:
         0 0 20px;
 
@@ -171,6 +185,7 @@
     ================================================== */
 
     .grid {
+
       display: grid;
 
       grid-template-columns:
@@ -195,6 +210,7 @@
     }
 
     .block img {
+
       display: block;
 
       width: 100%;
@@ -209,11 +225,14 @@
     ================================================== */
 
     .video-link {
+
       display: block;
+
       cursor: pointer;
     }
 
     .block video {
+
       display: block;
 
       width: 100%;
@@ -232,9 +251,11 @@
     ================================================== */
 
     .caption {
+
       margin-top: 6px;
 
       color: #777;
+
       font-size: 11px;
     }
 
@@ -244,6 +265,7 @@
     ================================================== */
 
     .text-block {
+
       padding: 12px;
 
       background: #f4f4f4;
@@ -257,6 +279,7 @@
     ================================================== */
 
     .link-block {
+
       display: block;
 
       border-top:
@@ -266,17 +289,21 @@
     }
 
     .link-block img {
+
       margin-bottom: 7px;
     }
 
     .link-title {
+
       font-size: 13px;
     }
 
     .link-url {
+
       margin-top: 3px;
 
       color: #999;
+
       font-size: 11px;
 
       word-break: break-word;
@@ -288,7 +315,9 @@
     ================================================== */
 
     .message {
+
       padding: 40px 0;
+
       color: #999;
     }
 
@@ -298,6 +327,7 @@
     ================================================== */
 
     .load-more {
+
       display: block;
 
       margin:
@@ -306,15 +336,18 @@
       border: 0;
 
       background: transparent;
+
       color: #888;
 
       font-family: inherit;
+
       font-size: 12px;
 
       cursor: pointer;
     }
 
     .load-more:hover {
+
       color: #111;
     }
 
@@ -324,6 +357,11 @@
     ================================================== */
 
     #scrollTop {
+
+      /*
+       * Fixed to the bottom center
+       * of the iframe.
+       */
 
       position: fixed;
 
@@ -337,8 +375,7 @@
       z-index: 999999;
 
       /*
-       * Hidden until the user scrolls
-       * approximately 60px.
+       * Hidden initially.
        */
 
       display: none;
@@ -361,6 +398,7 @@
       color: #888;
 
       font-family: inherit;
+
       font-size: 11px;
 
       line-height: 1;
@@ -369,6 +407,7 @@
     }
 
     #scrollTop:hover {
+
       color: #111;
     }
 
@@ -382,6 +421,7 @@
     ) {
 
       .grid {
+
         grid-template-columns:
           repeat(
             3,
@@ -397,10 +437,12 @@
     ) {
 
       body {
+
         font-size: 12px;
       }
 
       .top {
+
         padding:
           10px 12px 7px;
       }
@@ -408,32 +450,31 @@
       nav {
 
         padding-left: 12px;
+
         padding-right: 12px;
 
         padding-bottom: 10px;
 
         gap: 13px;
 
-        /*
-         * Still one line on mobile.
-         */
-
         flex-wrap: nowrap;
 
         overflow-x: auto;
-
       }
 
       nav button {
+
         font-size: 12px;
       }
 
       main {
+
         padding:
           14px 12px 50px;
       }
 
       .grid {
+
         grid-template-columns:
           repeat(
             2,
@@ -445,6 +486,7 @@
       }
 
       #scrollTop {
+
         bottom: 12px;
       }
 
@@ -491,7 +533,9 @@
   >
 
     <div class="message">
+
       loading…
+
     </div>
 
   </div>
@@ -523,6 +567,7 @@
 
 <script>
 
+
 /* ==================================================
    SETTINGS
 ================================================== */
@@ -541,8 +586,8 @@ const REFRESH_INTERVAL =
 
 
 /*
- * The scroll-to-top button appears
- * after approximately 60px.
+ * Scroll distance before the
+ * top button appears.
  */
 
 const SCROLL_THRESHOLD =
@@ -575,9 +620,14 @@ let viewRequestId = 0;
 async function request(url) {
 
   const response =
-    await fetch(url, {
-      cache: "no-cache"
-    });
+    await fetch(
+      url,
+      {
+        cache:
+          "no-cache"
+      }
+    );
+
 
   if (!response.ok) {
 
@@ -587,6 +637,7 @@ async function request(url) {
     );
 
   }
+
 
   return response.json();
 
@@ -601,7 +652,10 @@ async function loadChannels() {
 
   try {
 
-    setStatus("loading…");
+    setStatus(
+      "loading…"
+    );
+
 
     let page = 1;
 
@@ -643,7 +697,8 @@ async function loadChannels() {
     channels =
       everything.filter(
         item =>
-          item.type === "Channel"
+          item.type ===
+          "Channel"
       );
 
 
@@ -656,7 +711,9 @@ async function loadChannels() {
         channel => {
 
           if (
-            ids.has(channel.id)
+            ids.has(
+              channel.id
+            )
           ) {
 
             return false;
@@ -685,9 +742,12 @@ async function loadChannels() {
 
     buildNav();
 
+
     setStatus("");
 
+
     await showAll();
+
 
     startAutoRefresh();
 
@@ -699,7 +759,9 @@ async function loadChannels() {
       error
     );
 
+
     setStatus("");
+
 
     showError(
       "Couldn't load your channels."
@@ -722,7 +784,8 @@ function buildNav() {
     );
 
 
-  nav.innerHTML = "";
+  nav.innerHTML =
+    "";
 
 
   const all =
@@ -899,7 +962,9 @@ async function showAll(
     false;
 
 
-  setActive("all");
+  setActive(
+    "all"
+  );
 
 
   if (!preserveScroll) {
@@ -944,7 +1009,8 @@ async function showAll(
 
 
     if (
-      requestId !== viewRequestId
+      requestId !==
+      viewRequestId
     ) {
 
       return;
@@ -962,7 +1028,8 @@ async function showAll(
           block => {
 
             if (
-              block.type === "Channel"
+              block.type ===
+              "Channel"
             ) {
 
               return;
@@ -995,7 +1062,9 @@ async function showAll(
         block => {
 
           if (
-            seen.has(block.id)
+            seen.has(
+              block.id
+            )
           ) {
 
             return false;
@@ -1019,17 +1088,20 @@ async function showAll(
 
         const dateA =
           new Date(
-            a.created_at || 0
+            a.created_at ||
+            0
           ).getTime();
 
 
         const dateB =
           new Date(
-            b.created_at || 0
+            b.created_at ||
+            0
           ).getTime();
 
 
-        return dateB - dateA;
+        return dateB -
+          dateA;
 
       }
     );
@@ -1056,7 +1128,8 @@ async function showAll(
 
 
     if (
-      requestId !== viewRequestId
+      requestId !==
+      viewRequestId
     ) {
 
       return;
@@ -1125,7 +1198,8 @@ async function showChannel(
 
 
     if (
-      requestId !== viewRequestId
+      requestId !==
+      viewRequestId
     ) {
 
       return;
@@ -1136,7 +1210,8 @@ async function showChannel(
     window.scrollTo(
       {
         top: 0,
-        behavior: "smooth"
+        behavior:
+          "smooth"
       }
     );
 
@@ -1150,7 +1225,8 @@ async function showChannel(
 
 
     if (
-      requestId !== viewRequestId
+      requestId !==
+      viewRequestId
     ) {
 
       return;
@@ -1202,11 +1278,14 @@ async function loadChannelPage(
 
 
     const result =
-      await request(url);
+      await request(
+        url
+      );
 
 
     if (
-      requestId !== viewRequestId
+      requestId !==
+      viewRequestId
     ) {
 
       return;
@@ -1215,7 +1294,8 @@ async function loadChannelPage(
 
 
     const blocks =
-      result.data || [];
+      result.data ||
+      [];
 
 
     if (replace) {
@@ -1667,7 +1747,9 @@ function createBlock(
 
 
     const isVideo =
-      contentType.startsWith("video/") ||
+      contentType.startsWith(
+        "video/"
+      ) ||
       (
         attachmentUrl &&
         /\.(mp4|webm|mov|m4v|ogv)(\?.*)?$/i.test(
@@ -1767,6 +1849,19 @@ function createBlock(
 
           video.play().catch(
             function() {}
+          );
+
+        }
+      );
+
+
+      video.addEventListener(
+        "error",
+        function() {
+
+          console.warn(
+            "Video failed:",
+            attachmentUrl
           );
 
         }
@@ -2187,7 +2282,9 @@ function startAutoRefresh() {
 
         else {
 
-          await showAll(true);
+          await showAll(
+            true
+          );
 
         }
 
@@ -2227,7 +2324,8 @@ async function refreshCurrentChannel() {
 
 
     if (
-      requestId !== viewRequestId
+      requestId !==
+      viewRequestId
     ) {
 
       return;
@@ -2236,7 +2334,8 @@ async function refreshCurrentChannel() {
 
 
     const blocks =
-      result.data || [];
+      result.data ||
+      [];
 
 
     const grid =
@@ -2291,13 +2390,14 @@ const scrollTopButton =
 
 
 /*
- * Determine the current scroll position
- * of THIS iframe/page.
+ * Find the actual scroll position
+ * of this page.
  */
 
 function getScrollPosition() {
 
   return Math.max(
+
     window.scrollY || 0,
 
     window.pageYOffset || 0,
@@ -2305,27 +2405,25 @@ function getScrollPosition() {
     document.documentElement.scrollTop || 0,
 
     document.body.scrollTop || 0
+
   );
 
 }
 
 
 /*
- * Show the button after 60px.
- *
- * We deliberately use a very small
- * interval instead of changing any of
- * the content/loading logic.
+ * Show the button once the user
+ * has moved more than 60px.
  */
 
-function checkScrollPosition() {
+function updateScrollTopButton() {
 
-  const scrollPosition =
+  const position =
     getScrollPosition();
 
 
   if (
-    scrollPosition >=
+    position >=
     SCROLL_THRESHOLD
   ) {
 
@@ -2345,12 +2443,12 @@ function checkScrollPosition() {
 
 
 /*
- * Normal scroll listener.
+ * Normal scroll event.
  */
 
 window.addEventListener(
   "scroll",
-  checkScrollPosition,
+  updateScrollTopButton,
   {
     passive: true
   }
@@ -2358,21 +2456,35 @@ window.addEventListener(
 
 
 /*
- * Some embedded browsers don't reliably
- * fire scroll events, so check periodically.
+ * Extra scroll listener for
+ * embedded browsers.
+ */
+
+document.addEventListener(
+  "scroll",
+  updateScrollTopButton,
+  {
+    passive: true
+  }
+);
+
+
+/*
+ * Small periodic check makes the
+ * button more reliable inside an iframe.
  */
 
 setInterval(
-  checkScrollPosition,
+  updateScrollTopButton,
   100
 );
 
 
 /*
- * Initial state.
+ * Set initial state.
  */
 
-checkScrollPosition();
+updateScrollTopButton();
 
 
 /* ==================================================
@@ -2384,7 +2496,7 @@ scrollTopButton.addEventListener(
   function() {
 
     /*
-     * First scroll THIS iframe
+     * Scroll the iframe page
      * completely to the top.
      */
 
@@ -2395,45 +2507,32 @@ scrollTopButton.addEventListener(
     });
 
 
-    document.documentElement.scrollTop =
-      0;
-
-
-    document.body.scrollTop =
-      0;
-
-
     /*
-     * Also ask the parent Readymag page
-     * to scroll to its own top.
-     *
-     * This does nothing harmful if
-     * Readymag does not listen for it.
+     * Additional fallback for
+     * documentElement scrolling.
      */
 
-    try {
-
-      window.parent.postMessage(
-        {
-          type:
-            "ARENA_SCROLL_PARENT_TO_TOP"
-        },
-        "*"
-      );
-
-    }
-
-    catch (error) {
-
-      console.warn(
-        "Could not contact parent page."
-      );
-
-    }
+    document.documentElement.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth"
+    });
 
 
     /*
-     * Hide the button immediately.
+     * Additional fallback for
+     * body scrolling.
+     */
+
+    document.body.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth"
+    });
+
+
+    /*
+     * Hide immediately.
      */
 
     scrollTopButton.style.display =
