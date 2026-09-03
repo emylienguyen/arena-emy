@@ -68,26 +68,59 @@
       font-size: 11px;
     }
 
-    /* CHANNEL NAV */
+    /* ==================================================
+       CHANNEL NAVIGATION
+       Keeps ALL channels on ONE LINE.
+       If there are too many to fit, the user can
+       scroll horizontally.
+    ================================================== */
 
     nav {
       display: flex;
+      align-items: center;
       gap: 16px;
+
+      width: 100%;
 
       padding:
         12px 16px;
 
       overflow-x: auto;
+      overflow-y: hidden;
+
       white-space: nowrap;
 
+      /*
+       * Smooth horizontal scrolling on mobile.
+       */
+      -webkit-overflow-scrolling: touch;
+
+      /*
+       * Hide scrollbar while keeping scrolling enabled.
+       */
       scrollbar-width: none;
+
+      /*
+       * Prevent accidental wrapping.
+       */
+      flex-wrap: nowrap;
     }
 
+    /*
+     * Hide scrollbar in Chrome, Safari and Edge.
+     */
     nav::-webkit-scrollbar {
       display: none;
     }
 
+    /*
+     * IMPORTANT:
+     * Each channel button keeps its natural width
+     * and is never allowed to shrink.
+     */
     nav button {
+      flex: 0 0 auto;
+
       border: 0;
 
       padding: 0;
@@ -98,6 +131,8 @@
 
       font-family: inherit;
       font-size: 13px;
+
+      white-space: nowrap;
 
       cursor: pointer;
     }
@@ -283,6 +318,12 @@
           10px 12px 7px;
       }
 
+      /*
+       * Mobile channel navigation.
+       *
+       * Still ONE LINE.
+       * Extra channels can be swiped horizontally.
+       */
       nav {
         padding-left: 12px;
         padding-right: 12px;
@@ -290,10 +331,29 @@
         padding-bottom: 10px;
 
         gap: 13px;
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        flex-wrap: nowrap;
+
+        white-space: nowrap;
+
+        -webkit-overflow-scrolling: touch;
+
+        scrollbar-width: none;
+      }
+
+      nav::-webkit-scrollbar {
+        display: none;
       }
 
       nav button {
+        flex: 0 0 auto;
+
         font-size: 12px;
+
+        white-space: nowrap;
       }
 
       main {
@@ -1094,6 +1154,7 @@ async function loadChannelPage(
 
   }
 
+
 }
 
 
@@ -1496,27 +1557,12 @@ function createBlock(
     "Attachment"
   ) {
 
-    /*
-     * Find the attachment URL.
-     *
-     * Are.na attachments may expose their
-     * file URL in different fields, so we
-     * check the common possibilities.
-     */
-
     const attachmentUrl =
       block.attachment?.url ||
       block.attachment?.file_url ||
       block.url ||
       block.original?.url;
 
-
-    /*
-     * Are.na also provides the MIME type.
-     *
-     * This is more reliable than looking only
-     * at the filename extension.
-     */
 
     const contentType =
       block.content_type ||
@@ -1534,20 +1580,12 @@ function createBlock(
       );
 
 
-    /* -----------------------------------------------
-       VIDEO
-    ------------------------------------------------ */
+    /* VIDEO */
 
     if (
       isVideo &&
       attachmentUrl
     ) {
-
-      /*
-       * The link points to the ARE.NA BLOCK.
-       *
-       * The video source itself is separate.
-       */
 
       const link =
         document.createElement(
@@ -1581,44 +1619,21 @@ function createBlock(
         attachmentUrl;
 
 
-      /*
-       * AUTOPLAY
-       */
-
       video.autoplay =
         true;
 
-
-      /*
-       * Required by browsers for
-       * reliable autoplay.
-       */
 
       video.muted =
         true;
 
 
-      /*
-       * Repeat forever.
-       */
-
       video.loop =
         true;
 
 
-      /*
-       * Keep video inline on phones.
-       */
-
       video.playsInline =
         true;
 
-
-      /*
-       * Explicit HTML attributes.
-       * These help with autoplay in
-       * different browsers.
-       */
 
       video.setAttribute(
         "autoplay",
@@ -1644,43 +1659,21 @@ function createBlock(
       );
 
 
-      /*
-       * No controls.
-       */
-
       video.controls =
         false;
 
-
-      /*
-       * Try to start playback as soon
-       * as the video is ready.
-       */
 
       video.addEventListener(
         "canplay",
         function() {
 
           video.play().catch(
-            function() {
-
-              /*
-               * Some browsers may still
-               * delay autoplay until the
-               * element is visible.
-               */
-
-            }
+            function() {}
           );
 
         }
       );
 
-
-      /*
-       * If the video fails, remove it
-       * rather than leaving a broken box.
-       */
 
       video.addEventListener(
         "error",
@@ -1704,10 +1697,6 @@ function createBlock(
         link
       );
 
-
-      /*
-       * Optional caption.
-       */
 
       if (block.title) {
 
@@ -1737,9 +1726,7 @@ function createBlock(
     }
 
 
-    /* -----------------------------------------------
-       NORMAL ATTACHMENT
-    ------------------------------------------------ */
+    /* NORMAL ATTACHMENT */
 
     const link =
       document.createElement(
