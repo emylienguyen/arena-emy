@@ -212,6 +212,122 @@
 
 
     /* ==================================================
+       IMAGE HOVER
+    ================================================== */
+
+    /*
+     * Image blocks become the positioning
+     * container for the hover description.
+     */
+
+    .image-block {
+      position: relative;
+    }
+
+
+    /*
+     * The image link needs to be a block
+     * so the image fills its container.
+     */
+
+    .image-block > a {
+      display: block;
+      position: relative;
+    }
+
+
+    /*
+     * Smooth image fade.
+     */
+
+    .image-block > a > img {
+
+      transition:
+        opacity 0.25s ease;
+
+    }
+
+
+    /*
+     * On hover, the image fades to 15%.
+     *
+     * Change 0.15 to:
+     *
+     * 0.10 = 10%
+     * 0.15 = 15%
+     * 0.20 = 20%
+     */
+
+    .image-block:hover > a > img {
+      opacity: 0.15;
+    }
+
+
+    /* ==================================================
+       HOVER DESCRIPTION / THOUGHT
+    ================================================== */
+
+    .image-note {
+
+      position: absolute;
+
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      padding: 25px;
+
+      color: #111;
+
+      font-size: 13px;
+
+      line-height: 1.45;
+
+      text-align: center;
+
+      /*
+       * Allows line breaks from your
+       * Are.na description to remain.
+       */
+
+      white-space: pre-wrap;
+
+      /*
+       * Hidden until hover.
+       */
+
+      opacity: 0;
+
+      /*
+       * This means the description
+       * doesn't interfere with clicking
+       * the image underneath.
+       */
+
+      pointer-events: none;
+
+      transition:
+        opacity 0.25s ease;
+    }
+
+
+    /*
+     * Show your thought when hovering
+     * over the image.
+     */
+
+    .image-block:hover .image-note {
+      opacity: 1;
+    }
+
+
+    /* ==================================================
        VIDEO
     ================================================== */
 
@@ -479,6 +595,40 @@
         bottom: 12px;
       }
 
+
+      /*
+       * Mobile/touch devices don't have
+       * a reliable hover interaction.
+       *
+       * Therefore the image stays at
+       * full opacity and the thought
+       * appears underneath.
+       */
+
+      .image-block:hover > a > img {
+        opacity: 1;
+      }
+
+      .image-note {
+
+        position: static;
+
+        display: block;
+
+        padding:
+          6px 0 0;
+
+        color: #777;
+
+        font-size: 11px;
+
+        line-height: 1.4;
+
+        text-align: left;
+
+        opacity: 1;
+      }
+
     }
 
   </style>
@@ -600,6 +750,11 @@ async function request(url) {
     await fetch(
       url,
       {
+        /*
+         * no-cache makes sure the browser
+         * checks for fresh Are.na data.
+         */
+
         cache:
           "no-cache"
       }
@@ -1516,6 +1671,7 @@ async function loadChannelPage(
 
   }
 
+
 }
 
 
@@ -1659,6 +1815,66 @@ document
 
 
 /* ==================================================
+   GET DESCRIPTION
+================================================== */
+
+/*
+ * This function reads your Are.na description.
+ *
+ * It supports:
+ *
+ * 1. description as a normal string
+ *
+ * 2. description.plain
+ *
+ * 3. description.text
+ *
+ * This makes the code more tolerant
+ * of the way Are.na returns the field.
+ */
+
+function getBlockDescription(
+  block
+) {
+
+  if (
+    typeof block.description ===
+    "string"
+  ) {
+
+    return block.description.trim();
+
+  }
+
+
+  if (
+    block.description &&
+    typeof block.description.plain ===
+    "string"
+  ) {
+
+    return block.description.plain.trim();
+
+  }
+
+
+  if (
+    block.description &&
+    typeof block.description.text ===
+    "string"
+  ) {
+
+    return block.description.text.trim();
+
+  }
+
+
+  return "";
+
+}
+
+
+/* ==================================================
    CREATE BLOCK
 ================================================== */
 
@@ -1684,6 +1900,17 @@ function createBlock(
     block.type ===
     "Image"
   ) {
+
+    /*
+     * Make this block an image-block
+     * so the hover CSS applies only
+     * to images.
+     */
+
+    wrapper.classList.add(
+      "image-block"
+    );
+
 
     const imageUrl =
       block.image?.large?.src ||
@@ -1758,6 +1985,65 @@ function createBlock(
       link
     );
 
+
+    /* ==================================================
+       HOVER DESCRIPTION
+    ================================================== */
+
+    const description =
+      getBlockDescription(
+        block
+      );
+
+
+    /*
+     * Only create the hover text
+     * if you actually wrote a description
+     * in Are.na.
+     */
+
+    if (
+      description
+    ) {
+
+      const note =
+        document.createElement(
+          "div"
+        );
+
+
+      note.className =
+        "image-note";
+
+
+      /*
+       * textContent is intentional.
+       *
+       * Your Are.na description is treated
+       * as text, not HTML.
+       */
+
+      note.textContent =
+        description;
+
+
+      wrapper.appendChild(
+        note
+      );
+
+    }
+
+
+    /* ==================================================
+       TITLE / CAPTION
+    ================================================== */
+
+    /*
+     * IMPORTANT:
+     *
+     * The title remains underneath
+     * the image exactly as before.
+     */
 
     if (block.title) {
 
@@ -2541,6 +2827,13 @@ async function refreshCurrentChannel() {
     );
 
 
+    /*
+     * Re-rendering here means that if
+     * you edit a title or description
+     * in Are.na, the updated version
+     * gets pulled into the page.
+     */
+
     renderMasonry(
       blocks
     );
@@ -2766,4 +3059,3 @@ loadChannels();
 </body>
 
 </html>
-
