@@ -169,7 +169,6 @@
       align-items: start;
     }
 
-
     .masonry-column {
 
       min-width: 0;
@@ -204,24 +203,44 @@
 
 
     /* ==================================================
-       IMAGE HOVER
+       IMAGE + VIDEO HOVER CONTAINER
     ================================================== */
 
-    .image-block {
+    /*
+     * Both images AND videos use the same
+     * hover-description system.
+     */
+
+    .image-block,
+    .video-block {
+
       position: relative;
     }
 
-    .image-block > a {
+
+    /*
+     * The media link must fill the block.
+     */
+
+    .image-block > a,
+    .video-block > a {
+
       display: block;
+
       position: relative;
     }
+
+
+    /* ==================================================
+       IMAGE HOVER
+    ================================================== */
 
     .image-block > a > img {
 
       transition:
         opacity 0.25s ease;
-
     }
+
 
     .image-block:hover > a > img {
       opacity: 0.15;
@@ -229,8 +248,35 @@
 
 
     /* ==================================================
+       VIDEO HOVER
+    ================================================== */
+
+    /*
+     * Videos now fade in exactly the same way
+     * as still images.
+     */
+
+    .video-block > a > video {
+
+      transition:
+        opacity 0.25s ease;
+    }
+
+
+    .video-block:hover > a > video {
+
+      opacity: 0.15;
+    }
+
+
+    /* ==================================================
        HOVER DESCRIPTION / THOUGHT
     ================================================== */
+
+    /*
+     * Shared description overlay for BOTH
+     * still images and videos.
+     */
 
     .image-note {
 
@@ -264,9 +310,19 @@
 
       transition:
         opacity 0.25s ease;
+
+      z-index: 2;
     }
 
-    .image-block:hover .image-note {
+
+    /*
+     * Show description over BOTH
+     * images and videos.
+     */
+
+    .image-block:hover .image-note,
+    .video-block:hover .image-note {
+
       opacity: 1;
     }
 
@@ -539,7 +595,20 @@
         bottom: 12px;
       }
 
-      .image-block:hover > a > img {
+
+      /*
+       * Mobile/touch devices:
+       *
+       * No hover interaction.
+       *
+       * Videos and images remain at
+       * full opacity and the description
+       * appears underneath.
+       */
+
+      .image-block:hover > a > img,
+      .video-block:hover > a > video {
+
         opacity: 1;
       }
 
@@ -650,12 +719,7 @@ const PER_PAGE =
 
 
 /*
- * HOW OFTEN ARE.NA IS CHECKED
- *
- * 20 seconds is intentionally fast.
- *
- * The page only performs the actual
- * re-render when something has changed.
+ * Fast automatic synchronization.
  */
 
 const REFRESH_INTERVAL =
@@ -663,11 +727,7 @@ const REFRESH_INTERVAL =
 
 
 /*
- * A slower full synchronization is used
- * as a safety net.
- *
- * This is especially useful for edits to
- * older blocks that are not on page 1.
+ * Deeper synchronization safety net.
  */
 
 const FULL_SYNC_INTERVAL =
@@ -677,15 +737,6 @@ const FULL_SYNC_INTERVAL =
 const SCROLL_THRESHOLD =
   30;
 
-
-/*
- * Cache busting.
- *
- * Are.na's public API can be cached for
- * up to several minutes. Adding a unique
- * query parameter gives each refresh a
- * distinct URL.
- */
 
 const CACHE_BUST =
   true;
@@ -711,39 +762,23 @@ let fullSyncTimer = null;
 
 let viewRequestId = 0;
 
-
-/*
- * Current rendered data.
- *
- * This lets us compare new Are.na data
- * against what is already on screen.
- */
-
 let channelCache =
   new Map();
 
+let loadedChannelBlocks =
+  [];
 
-/*
- * Stores all loaded pages for the
- * currently selected channel.
- */
+let autoRefreshing =
+  false;
 
-let loadedChannelBlocks = [];
+let lastFullSync =
+  0;
 
+let allBlocksCache =
+  [];
 
-/*
- * Prevents multiple automatic refreshes
- * from running at the same time.
- */
-
-let autoRefreshing = false;
-
-
-/*
- * Timestamp of last full synchronization.
- */
-
-let lastFullSync = 0;
+let channelFirstPageCache =
+  new Map();
 
 
 /* ==================================================
@@ -754,15 +789,6 @@ async function request(
   url,
   options = {}
 ) {
-
-  /*
-   * Add a cache-busting parameter only
-   * when requested.
-   *
-   * This is deliberately done at the
-   * URL level rather than relying only
-   * on fetch("no-cache").
-   */
 
   if (CACHE_BUST) {
 
@@ -781,11 +807,6 @@ async function request(
     await fetch(
       url,
       {
-        /*
-         * Keep the browser from reusing
-         * its own cached response.
-         */
-
         cache:
           "no-store",
 
@@ -810,7 +831,7 @@ async function request(
 
 
 /* ==================================================
-   SMALL DELAY HELPER
+   WAIT
 ================================================== */
 
 function wait(
@@ -831,14 +852,6 @@ function wait(
 /* ==================================================
    BLOCK SIGNATURE
 ================================================== */
-
-/*
- * We use a small signature to determine
- * whether a block actually changed.
- *
- * This avoids rebuilding the page when
- * Are.na is returning the same data.
- */
 
 function blockSignature(
   block
@@ -947,35 +960,6 @@ function blocksHaveChanged(
 
 
 /* ==================================================
-   CHANNEL SIGNATURE
-================================================== */
-
-function channelSignature(
-  channel
-) {
-
-  return JSON.stringify({
-
-    id:
-      channel.id,
-
-    title:
-      channel.title || "",
-
-    updated_at:
-      channel.updated_at || "",
-
-    length:
-      channel.length ||
-      channel.counts?.blocks ||
-      ""
-
-  });
-
-}
-
-
-/* ==================================================
    LOAD CHANNELS
 ================================================== */
 
@@ -992,12 +976,6 @@ async function loadChannels() {
 
     let everything = [];
 
-
-    /*
-     * Initial channel discovery is still
-     * complete so your navigation remains
-     * exactly the same.
-     */
 
     while (true) {
 
@@ -1076,10 +1054,6 @@ async function loadChannels() {
         )
     );
 
-
-    /*
-     * Cache channel metadata.
-     */
 
     channels.forEach(
       channel => {
@@ -1244,7 +1218,7 @@ function setActive(
 
 
 /* ==================================================
-   FETCH ONE CHANNEL PAGE
+   FETCH CHANNEL PAGE
 ================================================== */
 
 async function fetchChannelPage(
@@ -1349,16 +1323,6 @@ function sortChronologically(
         ).getTime();
 
 
-      /*
-       * Newest first.
-       *
-       * Therefore:
-       *
-       * blocks[0]
-       * = newest
-       * = top-left
-       */
-
       return dateB -
         dateA;
 
@@ -1458,7 +1422,7 @@ function createColumns() {
 
 
 /* ==================================================
-   RENDER STRICT CHRONOLOGICAL MASONRY
+   RENDER MASONRY
 ================================================== */
 
 function renderMasonry(
@@ -1487,19 +1451,6 @@ function renderMasonry(
   const columns =
     createColumns();
 
-
-  /*
-   * Strict sequence:
-   *
-   * 1 → column 1
-   * 2 → column 2
-   * 3 → column 3
-   * 4 → column 4
-   * 5 → column 1
-   *
-   * This preserves your existing
-   * top-row chronological layout.
-   */
 
   blocks.forEach(
     (block, index) => {
@@ -1582,14 +1533,6 @@ async function showAll(
 
   try {
 
-    /*
-     * IMPORTANT:
-     *
-     * The initial "all" view still loads
-     * all content so the appearance and
-     * functionality remain the same.
-     */
-
     const results =
       await Promise.all(
 
@@ -1629,10 +1572,6 @@ async function showAll(
     results.forEach(
       result => {
 
-        /*
-         * Update our channel cache.
-         */
-
         channelCache.set(
           result.channel.id,
           result.channel
@@ -1667,10 +1606,6 @@ async function showAll(
       }
     );
 
-
-    /*
-     * Remove duplicates.
-     */
 
     const seen =
       new Set();
@@ -1707,13 +1642,27 @@ async function showAll(
     );
 
 
-    /*
-     * Save the complete current
-     * "all" dataset.
-     */
-
     allBlocksCache =
       blocks;
+
+
+    /*
+     * Also seed the fast-refresh cache.
+     */
+
+    results.forEach(
+      result => {
+
+        channelFirstPageCache.set(
+          result.channel.id,
+          result.blocks.slice(
+            0,
+            PER_PAGE
+          )
+        );
+
+      }
+    );
 
 
     clearLoading();
@@ -1759,28 +1708,8 @@ async function showAll(
 
 
 /* ==================================================
-   ALL VIEW CACHE
+   FAST ALL REFRESH
 ================================================== */
-
-let allBlocksCache =
-  [];
-
-
-/* ==================================================
-   FAST ALL VIEW REFRESH
-================================================== */
-
-/*
- * Instead of downloading every page of
- * every channel every 20 seconds, we first
- * check the first page of every channel.
- *
- * New blocks normally appear there because
- * the API's default ordering is position/date.
- *
- * If something important changes, we rebuild
- * the visible "all" dataset.
- */
 
 async function fastRefreshAll() {
 
@@ -1817,9 +1746,7 @@ async function fastRefreshAll() {
             return {
               channel,
               blocks:
-                result.blocks,
-              meta:
-                result.meta
+                result.blocks
             };
 
           }
@@ -1831,11 +1758,6 @@ async function fastRefreshAll() {
     let changed =
       false;
 
-
-    /*
-     * Check the newest page against
-     * the cached channel data.
-     */
 
     for (
       const result of results
@@ -1875,25 +1797,12 @@ async function fastRefreshAll() {
     }
 
 
-    /*
-     * If there is no change, do absolutely
-     * nothing to the visible page.
-     */
-
     if (!changed) {
 
       return;
 
     }
 
-
-    /*
-     * Something changed.
-     *
-     * Do a full synchronization so
-     * additions/removals/edits are all
-     * represented correctly.
-     */
 
     await fullRefreshAll(
       true
@@ -1917,10 +1826,6 @@ async function fastRefreshAll() {
 }
 
 
-let channelFirstPageCache =
-  new Map();
-
-
 /* ==================================================
    FULL ALL REFRESH
 ================================================== */
@@ -1928,16 +1833,6 @@ let channelFirstPageCache =
 async function fullRefreshAll(
   preserveScroll = true
 ) {
-
-  if (
-    autoRefreshing &&
-    !preserveScroll
-  ) {
-
-    return;
-
-  }
-
 
   const requestId =
     ++viewRequestId;
@@ -1994,6 +1889,15 @@ async function fullRefreshAll(
         );
 
 
+        channelFirstPageCache.set(
+          result.channel.id,
+          result.blocks.slice(
+            0,
+            PER_PAGE
+          )
+        );
+
+
         result.blocks.forEach(
           block => {
 
@@ -2070,11 +1974,6 @@ async function fullRefreshAll(
     lastFullSync =
       Date.now();
 
-
-    /*
-     * Restore exactly where the visitor
-     * was before synchronization.
-     */
 
     if (
       preserveScroll
@@ -2269,20 +2168,12 @@ async function loadChannelPage(
 
     } else {
 
-      /*
-       * Keep all previously loaded pages.
-       */
-
       loadedChannelBlocks =
         [
           ...loadedChannelBlocks,
           ...blocks
         ];
 
-
-      /*
-       * Remove accidental duplicates.
-       */
 
       const seen =
         new Set();
@@ -2325,10 +2216,6 @@ async function loadChannelPage(
 
     }
 
-
-    /*
-     * Cache the first page.
-     */
 
     if (
       page === 1
@@ -2398,13 +2285,6 @@ async function refreshCurrentChannel() {
 
   try {
 
-    /*
-     * First check only page 1.
-     *
-     * This is much faster than downloading
-     * every loaded page every 20 seconds.
-     */
-
     const result =
       await fetchChannelPage(
         currentChannel,
@@ -2436,10 +2316,6 @@ async function refreshCurrentChannel() {
       );
 
 
-    /*
-     * If nothing changed, stop here.
-     */
-
     if (
       !blocksHaveChanged(
         oldFirstPage,
@@ -2457,20 +2333,6 @@ async function refreshCurrentChannel() {
       newFirstPage
     );
 
-
-    /*
-     * Re-fetch all pages currently
-     * needed by the visitor.
-     *
-     * This catches:
-     *
-     * - new blocks
-     * - deleted blocks
-     * - changed descriptions
-     * - changed titles
-     * - changed images
-     * - changed videos
-     */
 
     let freshBlocks =
       [];
@@ -2511,10 +2373,6 @@ async function refreshCurrentChannel() {
 
     }
 
-
-    /*
-     * Deduplicate.
-     */
 
     const seen =
       new Set();
@@ -2560,14 +2418,6 @@ async function refreshCurrentChannel() {
       || false;
 
 
-    currentPage =
-      Math.min(
-        currentPage,
-        result.meta?.current_page
-        || currentPage
-      );
-
-
     renderMasonry(
       loadedChannelBlocks
     );
@@ -2575,11 +2425,6 @@ async function refreshCurrentChannel() {
 
     updateLoadMore();
 
-
-    /*
-     * Put the visitor back at the exact
-     * scroll position they were using.
-     */
 
     requestAnimationFrame(
       function() {
@@ -2613,14 +2458,6 @@ async function refreshCurrentChannel() {
 /* ==================================================
    DEEP CHANNEL SYNCHRONIZATION
 ================================================== */
-
-/*
- * Every FULL_SYNC_INTERVAL we perform
- * a deeper synchronization.
- *
- * This catches edits to older blocks that
- * aren't currently on page 1.
- */
 
 async function deepRefreshCurrentChannel() {
 
@@ -3199,6 +3036,20 @@ function createBlock(
       attachmentUrl
     ) {
 
+      /*
+       * IMPORTANT:
+       *
+       * The wrapper gets "video-block".
+       *
+       * This is what makes the same hover
+       * description system work for videos.
+       */
+
+      wrapper.classList.add(
+        "video-block"
+      );
+
+
       const link =
         document.createElement(
           "a"
@@ -3295,6 +3146,44 @@ function createBlock(
       wrapper.appendChild(
         link
       );
+
+
+      /*
+       * SAME DESCRIPTION LOGIC AS IMAGES.
+       *
+       * The Are.na description is now
+       * displayed over the video on hover.
+       */
+
+      const description =
+        getBlockDescription(
+          block
+        );
+
+
+      if (
+        description
+      ) {
+
+        const note =
+          document.createElement(
+            "div"
+          );
+
+
+        note.className =
+          "image-note";
+
+
+        note.textContent =
+          description;
+
+
+        wrapper.appendChild(
+          note
+        );
+
+      }
 
 
       if (block.title) {
@@ -3674,12 +3563,6 @@ function startAutoRefresh() {
   }
 
 
-  /*
-   * FAST CHECK
-   *
-   * Every 20 seconds.
-   */
-
   refreshTimer =
     setInterval(
       async function() {
@@ -3710,12 +3593,6 @@ function startAutoRefresh() {
       REFRESH_INTERVAL
     );
 
-
-  /*
-   * DEEP CHECK
-   *
-   * Every 2 minutes.
-   */
 
   fullSyncTimer =
     setInterval(
@@ -3767,13 +3644,6 @@ function startAutoRefresh() {
    PAGE VISIBILITY
 ================================================== */
 
-/*
- * When the visitor comes back to the
- * Readymag tab, immediately check Are.na
- * instead of waiting for the next 20-second
- * interval.
- */
-
 document.addEventListener(
   "visibilitychange",
   async function() {
@@ -3797,11 +3667,6 @@ document.addEventListener(
 
     }
 
-
-    /*
-     * Small delay lets the browser finish
-     * returning the page to the foreground.
-     */
 
     await wait(
       150
@@ -3893,10 +3758,6 @@ document.addEventListener(
 );
 
 
-/*
- * Kept from your original code.
- */
-
 setInterval(
   updateScrollTopButton,
   100
@@ -3984,12 +3845,7 @@ window.addEventListener(
 
 
           /*
-           * Rebuild the current view using
-           * already-loaded data where possible.
-           *
-           * This avoids making an unnecessary
-           * API request just because the
-           * browser width changed.
+           * Rebuild from already-loaded data.
            */
 
           if (
