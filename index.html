@@ -170,14 +170,6 @@
     }
 
 
-    /*
-     * Each column is a normal vertical
-     * flex stack.
-     *
-     * JavaScript controls which item
-     * goes into which column.
-     */
-
     .masonry-column {
 
       min-width: 0;
@@ -215,30 +207,14 @@
        IMAGE HOVER
     ================================================== */
 
-    /*
-     * Image blocks become the positioning
-     * container for the hover description.
-     */
-
     .image-block {
       position: relative;
     }
-
-
-    /*
-     * The image link needs to be a block
-     * so the image fills its container.
-     */
 
     .image-block > a {
       display: block;
       position: relative;
     }
-
-
-    /*
-     * Smooth image fade.
-     */
 
     .image-block > a > img {
 
@@ -246,17 +222,6 @@
         opacity 0.25s ease;
 
     }
-
-
-    /*
-     * On hover, the image fades to 15%.
-     *
-     * Change 0.15 to:
-     *
-     * 0.10 = 10%
-     * 0.15 = 15%
-     * 0.20 = 20%
-     */
 
     .image-block:hover > a > img {
       opacity: 0.15;
@@ -291,36 +256,15 @@
 
       text-align: center;
 
-      /*
-       * Allows line breaks from your
-       * Are.na description to remain.
-       */
-
       white-space: pre-wrap;
 
-      /*
-       * Hidden until hover.
-       */
-
       opacity: 0;
-
-      /*
-       * This means the description
-       * doesn't interfere with clicking
-       * the image underneath.
-       */
 
       pointer-events: none;
 
       transition:
         opacity 0.25s ease;
     }
-
-
-    /*
-     * Show your thought when hovering
-     * over the image.
-     */
 
     .image-block:hover .image-note {
       opacity: 1;
@@ -595,16 +539,6 @@
         bottom: 12px;
       }
 
-
-      /*
-       * Mobile/touch devices don't have
-       * a reliable hover interaction.
-       *
-       * Therefore the image stays at
-       * full opacity and the thought
-       * appears underneath.
-       */
-
       .image-block:hover > a > img {
         opacity: 1;
       }
@@ -714,11 +648,47 @@ const API =
 const PER_PAGE =
   100;
 
+
+/*
+ * HOW OFTEN ARE.NA IS CHECKED
+ *
+ * 20 seconds is intentionally fast.
+ *
+ * The page only performs the actual
+ * re-render when something has changed.
+ */
+
 const REFRESH_INTERVAL =
-  5 * 60 * 1000;
+  20 * 1000;
+
+
+/*
+ * A slower full synchronization is used
+ * as a safety net.
+ *
+ * This is especially useful for edits to
+ * older blocks that are not on page 1.
+ */
+
+const FULL_SYNC_INTERVAL =
+  2 * 60 * 1000;
+
 
 const SCROLL_THRESHOLD =
   30;
+
+
+/*
+ * Cache busting.
+ *
+ * Are.na's public API can be cached for
+ * up to several minutes. Adding a unique
+ * query parameter gives each refresh a
+ * distinct URL.
+ */
+
+const CACHE_BUST =
+  true;
 
 
 /* ==================================================
@@ -737,26 +707,89 @@ let loading = false;
 
 let refreshTimer = null;
 
+let fullSyncTimer = null;
+
 let viewRequestId = 0;
+
+
+/*
+ * Current rendered data.
+ *
+ * This lets us compare new Are.na data
+ * against what is already on screen.
+ */
+
+let channelCache =
+  new Map();
+
+
+/*
+ * Stores all loaded pages for the
+ * currently selected channel.
+ */
+
+let loadedChannelBlocks = [];
+
+
+/*
+ * Prevents multiple automatic refreshes
+ * from running at the same time.
+ */
+
+let autoRefreshing = false;
+
+
+/*
+ * Timestamp of last full synchronization.
+ */
+
+let lastFullSync = 0;
 
 
 /* ==================================================
    API REQUEST
 ================================================== */
 
-async function request(url) {
+async function request(
+  url,
+  options = {}
+) {
+
+  /*
+   * Add a cache-busting parameter only
+   * when requested.
+   *
+   * This is deliberately done at the
+   * URL level rather than relying only
+   * on fetch("no-cache").
+   */
+
+  if (CACHE_BUST) {
+
+    const separator =
+      url.includes("?")
+        ? "&"
+        : "?";
+
+    url +=
+      `${separator}_=${Date.now()}`;
+
+  }
+
 
   const response =
     await fetch(
       url,
       {
         /*
-         * no-cache makes sure the browser
-         * checks for fresh Are.na data.
+         * Keep the browser from reusing
+         * its own cached response.
          */
 
         cache:
-          "no-cache"
+          "no-store",
+
+        ...options
       }
     );
 
@@ -772,6 +805,172 @@ async function request(url) {
 
 
   return response.json();
+
+}
+
+
+/* ==================================================
+   SMALL DELAY HELPER
+================================================== */
+
+function wait(
+  milliseconds
+) {
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        milliseconds
+      )
+  );
+
+}
+
+
+/* ==================================================
+   BLOCK SIGNATURE
+================================================== */
+
+/*
+ * We use a small signature to determine
+ * whether a block actually changed.
+ *
+ * This avoids rebuilding the page when
+ * Are.na is returning the same data.
+ */
+
+function blockSignature(
+  block
+) {
+
+  return JSON.stringify({
+
+    id:
+      block.id,
+
+    type:
+      block.type,
+
+    title:
+      block.title || "",
+
+    description:
+      getBlockDescription(
+        block
+      ),
+
+    content:
+      block.content?.plain ||
+      block.content?.markdown ||
+      "",
+
+    url:
+      block.url ||
+      block.source?.url ||
+      "",
+
+    created_at:
+      block.created_at ||
+      "",
+
+    updated_at:
+      block.updated_at ||
+      "",
+
+    image:
+      block.image?.large?.src ||
+      block.image?.medium?.src ||
+      block.image?.small?.src ||
+      block.image?.src ||
+      "",
+
+    attachment:
+      block.attachment?.url ||
+      block.attachment?.file_url ||
+      "",
+
+    embed:
+      block.embed?.source_url ||
+      ""
+
+  });
+
+}
+
+
+/* ==================================================
+   BLOCKS HAVE CHANGED?
+================================================== */
+
+function blocksHaveChanged(
+  oldBlocks,
+  newBlocks
+) {
+
+  if (
+    oldBlocks.length !==
+    newBlocks.length
+  ) {
+
+    return true;
+
+  }
+
+
+  for (
+    let i = 0;
+    i < newBlocks.length;
+    i++
+  ) {
+
+    if (
+      blockSignature(
+        oldBlocks[i]
+      )
+      !==
+      blockSignature(
+        newBlocks[i]
+      )
+    ) {
+
+      return true;
+
+    }
+
+  }
+
+
+  return false;
+
+}
+
+
+/* ==================================================
+   CHANNEL SIGNATURE
+================================================== */
+
+function channelSignature(
+  channel
+) {
+
+  return JSON.stringify({
+
+    id:
+      channel.id,
+
+    title:
+      channel.title || "",
+
+    updated_at:
+      channel.updated_at || "",
+
+    length:
+      channel.length ||
+      channel.counts?.blocks ||
+      ""
+
+  });
 
 }
 
@@ -793,6 +992,12 @@ async function loadChannels() {
 
     let everything = [];
 
+
+    /*
+     * Initial channel discovery is still
+     * complete so your navigation remains
+     * exactly the same.
+     */
 
     while (true) {
 
@@ -869,6 +1074,22 @@ async function loadChannels() {
         a.title.localeCompare(
           b.title
         )
+    );
+
+
+    /*
+     * Cache channel metadata.
+     */
+
+    channels.forEach(
+      channel => {
+
+        channelCache.set(
+          channel.id,
+          channel
+        );
+
+      }
     );
 
 
@@ -986,7 +1207,9 @@ function buildNav() {
    ACTIVE NAV
 ================================================== */
 
-function setActive(id) {
+function setActive(
+  id
+) {
 
   document
     .querySelectorAll(
@@ -1021,6 +1244,40 @@ function setActive(id) {
 
 
 /* ==================================================
+   FETCH ONE CHANNEL PAGE
+================================================== */
+
+async function fetchChannelPage(
+  channel,
+  page = 1
+) {
+
+  const result =
+    await request(
+      `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`
+    );
+
+
+  const blocks =
+    result.data ||
+    [];
+
+
+  sortChronologically(
+    blocks
+  );
+
+
+  return {
+    blocks,
+    meta:
+      result.meta || {}
+  };
+
+}
+
+
+/* ==================================================
    FETCH ALL CHANNEL BLOCKS
 ================================================== */
 
@@ -1036,18 +1293,15 @@ async function fetchAllChannelBlocks(
   while (true) {
 
     const result =
-      await request(
-        `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`
+      await fetchChannelPage(
+        channel,
+        page
       );
 
 
-    if (result.data) {
-
-      blocks.push(
-        ...result.data
-      );
-
-    }
+    blocks.push(
+      ...result.blocks
+    );
 
 
     if (
@@ -1235,32 +1489,16 @@ function renderMasonry(
 
 
   /*
-   * IMPORTANT:
-   *
-   * The blocks are already:
-   *
-   * newest → oldest
-   *
-   *
-   * We assign them in strict
-   * sequence:
+   * Strict sequence:
    *
    * 1 → column 1
    * 2 → column 2
    * 3 → column 3
    * 4 → column 4
    * 5 → column 1
-   * 6 → column 2
    *
-   *
-   * This means the top row is
-   * always chronological.
-   *
-   * We do NOT put an item into
-   * whichever column happens to
-   * be shortest, because that
-   * would destroy chronological
-   * visual order.
+   * This preserves your existing
+   * top-row chronological layout.
    */
 
   blocks.forEach(
@@ -1317,6 +1555,10 @@ async function showAll(
     false;
 
 
+  loadedChannelBlocks =
+    [];
+
+
   setActive(
     "all"
   );
@@ -1339,6 +1581,14 @@ async function showAll(
 
 
   try {
+
+    /*
+     * IMPORTANT:
+     *
+     * The initial "all" view still loads
+     * all content so the appearance and
+     * functionality remain the same.
+     */
 
     const results =
       await Promise.all(
@@ -1378,6 +1628,16 @@ async function showAll(
 
     results.forEach(
       result => {
+
+        /*
+         * Update our channel cache.
+         */
+
+        channelCache.set(
+          result.channel.id,
+          result.channel
+        );
+
 
         result.blocks.forEach(
           block => {
@@ -1442,13 +1702,18 @@ async function showAll(
       );
 
 
-    /*
-     * NEWEST → OLDEST
-     */
-
     sortChronologically(
       blocks
     );
+
+
+    /*
+     * Save the complete current
+     * "all" dataset.
+     */
+
+    allBlocksCache =
+      blocks;
 
 
     clearLoading();
@@ -1460,6 +1725,10 @@ async function showAll(
 
 
     updateLoadMore();
+
+
+    lastFullSync =
+      Date.now();
 
 
   } catch (error) {
@@ -1490,6 +1759,353 @@ async function showAll(
 
 
 /* ==================================================
+   ALL VIEW CACHE
+================================================== */
+
+let allBlocksCache =
+  [];
+
+
+/* ==================================================
+   FAST ALL VIEW REFRESH
+================================================== */
+
+/*
+ * Instead of downloading every page of
+ * every channel every 20 seconds, we first
+ * check the first page of every channel.
+ *
+ * New blocks normally appear there because
+ * the API's default ordering is position/date.
+ *
+ * If something important changes, we rebuild
+ * the visible "all" dataset.
+ */
+
+async function fastRefreshAll() {
+
+  if (
+    autoRefreshing ||
+    document.visibilityState !==
+    "visible"
+  ) {
+
+    return;
+
+  }
+
+
+  autoRefreshing =
+    true;
+
+
+  try {
+
+    const results =
+      await Promise.all(
+
+        channels.map(
+          async channel => {
+
+            const result =
+              await fetchChannelPage(
+                channel,
+                1
+              );
+
+
+            return {
+              channel,
+              blocks:
+                result.blocks,
+              meta:
+                result.meta
+            };
+
+          }
+        )
+
+      );
+
+
+    let changed =
+      false;
+
+
+    /*
+     * Check the newest page against
+     * the cached channel data.
+     */
+
+    for (
+      const result of results
+    ) {
+
+      const old =
+        channelFirstPageCache.get(
+          result.channel.id
+        );
+
+
+      if (
+        !old ||
+        blocksHaveChanged(
+          old,
+          result.blocks
+        )
+      ) {
+
+        changed =
+          true;
+
+      }
+
+
+      channelFirstPageCache.set(
+        result.channel.id,
+        result.blocks
+      );
+
+
+      channelCache.set(
+        result.channel.id,
+        result.channel
+      );
+
+    }
+
+
+    /*
+     * If there is no change, do absolutely
+     * nothing to the visible page.
+     */
+
+    if (!changed) {
+
+      return;
+
+    }
+
+
+    /*
+     * Something changed.
+     *
+     * Do a full synchronization so
+     * additions/removals/edits are all
+     * represented correctly.
+     */
+
+    await fullRefreshAll(
+      true
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "FAST ALL REFRESH ERROR:",
+      error
+    );
+
+  } finally {
+
+    autoRefreshing =
+      false;
+
+  }
+
+}
+
+
+let channelFirstPageCache =
+  new Map();
+
+
+/* ==================================================
+   FULL ALL REFRESH
+================================================== */
+
+async function fullRefreshAll(
+  preserveScroll = true
+) {
+
+  if (
+    autoRefreshing &&
+    !preserveScroll
+  ) {
+
+    return;
+
+  }
+
+
+  const requestId =
+    ++viewRequestId;
+
+
+  const oldScroll =
+    getScrollPosition();
+
+
+  try {
+
+    const results =
+      await Promise.all(
+
+        channels.map(
+          async channel => {
+
+            const blocks =
+              await fetchAllChannelBlocks(
+                channel
+              );
+
+
+            return {
+              channel,
+              blocks
+            };
+
+          }
+        )
+
+      );
+
+
+    if (
+      requestId !==
+      viewRequestId
+    ) {
+
+      return;
+
+    }
+
+
+    let blocks = [];
+
+
+    results.forEach(
+      result => {
+
+        channelCache.set(
+          result.channel.id,
+          result.channel
+        );
+
+
+        result.blocks.forEach(
+          block => {
+
+            if (
+              block.type ===
+              "Channel"
+            ) {
+
+              return;
+
+            }
+
+
+            blocks.push({
+
+              ...block,
+
+              sourceChannel:
+                result.channel.title
+
+            });
+
+          }
+        );
+
+      }
+    );
+
+
+    const seen =
+      new Set();
+
+
+    blocks =
+      blocks.filter(
+        block => {
+
+          if (
+            seen.has(
+              block.id
+            )
+          ) {
+
+            return false;
+
+          }
+
+
+          seen.add(
+            block.id
+          );
+
+
+          return true;
+
+        }
+      );
+
+
+    sortChronologically(
+      blocks
+    );
+
+
+    allBlocksCache =
+      blocks;
+
+
+    renderMasonry(
+      blocks
+    );
+
+
+    lastFullSync =
+      Date.now();
+
+
+    /*
+     * Restore exactly where the visitor
+     * was before synchronization.
+     */
+
+    if (
+      preserveScroll
+    ) {
+
+      requestAnimationFrame(
+        function() {
+
+          window.scrollTo(
+            0,
+            oldScroll
+          );
+
+        }
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "FULL ALL REFRESH ERROR:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ==================================================
    SHOW CHANNEL
 ================================================== */
 
@@ -1511,6 +2127,10 @@ async function showChannel(
 
   hasMore =
     false;
+
+
+  loadedChannelBlocks =
+    [];
 
 
   setActive(
@@ -1595,7 +2215,9 @@ async function loadChannelPage(
   requestId
 ) {
 
-  if (loading) {
+  if (
+    loading
+  ) {
 
     return;
 
@@ -1609,8 +2231,9 @@ async function loadChannelPage(
   try {
 
     const result =
-      await request(
-        `${API}/channels/${channel.id}/contents?page=${page}&per=${PER_PAGE}`
+      await fetchChannelPage(
+        channel,
+        page
       );
 
 
@@ -1625,26 +2248,94 @@ async function loadChannelPage(
 
 
     const blocks =
-      result.data ||
-      [];
-
-
-    sortChronologically(
-      blocks
-    );
+      result.blocks;
 
 
     if (replace) {
 
+      loadedChannelBlocks =
+        [
+          ...blocks
+        ];
+
+
       clearLoading();
 
+
       renderMasonry(
-        blocks
+        loadedChannelBlocks
       );
+
 
     } else {
 
-      appendBlocks(
+      /*
+       * Keep all previously loaded pages.
+       */
+
+      loadedChannelBlocks =
+        [
+          ...loadedChannelBlocks,
+          ...blocks
+        ];
+
+
+      /*
+       * Remove accidental duplicates.
+       */
+
+      const seen =
+        new Set();
+
+
+      loadedChannelBlocks =
+        loadedChannelBlocks.filter(
+          block => {
+
+            if (
+              seen.has(
+                block.id
+              )
+            ) {
+
+              return false;
+
+            }
+
+
+            seen.add(
+              block.id
+            );
+
+
+            return true;
+
+          }
+        );
+
+
+      sortChronologically(
+        loadedChannelBlocks
+      );
+
+
+      renderMasonry(
+        loadedChannelBlocks
+      );
+
+    }
+
+
+    /*
+     * Cache the first page.
+     */
+
+    if (
+      page === 1
+    ) {
+
+      channelFirstPageCache.set(
+        channel.id,
         blocks
       );
 
@@ -1671,105 +2362,373 @@ async function loadChannelPage(
 
   }
 
-
 }
 
 
 /* ==================================================
-   APPEND BLOCKS
+   FAST CHANNEL REFRESH
 ================================================== */
 
-function appendBlocks(
-  blocks
-) {
+async function refreshCurrentChannel() {
 
-  const grid =
-    document.getElementById(
-      "grid"
-    );
-
-
-  const columns =
-    Array.from(
-      grid.querySelectorAll(
-        ".masonry-column"
-      )
-    );
-
-
-  if (!columns.length) {
-
-    renderMasonry(
-      blocks
-    );
+  if (
+    !currentChannel ||
+    loading ||
+    autoRefreshing ||
+    document.visibilityState !==
+    "visible"
+  ) {
 
     return;
 
   }
 
 
-  /*
-   * When loading another page,
-   * we append the older content
-   * after the existing content.
-   *
-   * This preserves:
-   *
-   * newest → oldest
-   */
+  autoRefreshing =
+    true;
 
-  blocks.forEach(
-    block => {
 
-      const element =
-        createBlock(
-          block
+  const requestId =
+    ++viewRequestId;
+
+
+  const oldScroll =
+    getScrollPosition();
+
+
+  try {
+
+    /*
+     * First check only page 1.
+     *
+     * This is much faster than downloading
+     * every loaded page every 20 seconds.
+     */
+
+    const result =
+      await fetchChannelPage(
+        currentChannel,
+        1
+      );
+
+
+    if (
+      requestId !==
+      viewRequestId
+    ) {
+
+      return;
+
+    }
+
+
+    const newFirstPage =
+      result.blocks;
+
+
+    const oldFirstPage =
+      channelFirstPageCache.get(
+        currentChannel.id
+      ) ||
+      loadedChannelBlocks.slice(
+        0,
+        PER_PAGE
+      );
+
+
+    /*
+     * If nothing changed, stop here.
+     */
+
+    if (
+      !blocksHaveChanged(
+        oldFirstPage,
+        newFirstPage
+      )
+    ) {
+
+      return;
+
+    }
+
+
+    channelFirstPageCache.set(
+      currentChannel.id,
+      newFirstPage
+    );
+
+
+    /*
+     * Re-fetch all pages currently
+     * needed by the visitor.
+     *
+     * This catches:
+     *
+     * - new blocks
+     * - deleted blocks
+     * - changed descriptions
+     * - changed titles
+     * - changed images
+     * - changed videos
+     */
+
+    let freshBlocks =
+      [];
+
+
+    const pagesNeeded =
+      Math.max(
+        1,
+        currentPage
+      );
+
+
+    for (
+      let page = 1;
+      page <= pagesNeeded;
+      page++
+    ) {
+
+      const pageResult =
+        await fetchChannelPage(
+          currentChannel,
+          page
         );
 
 
-      if (!element) {
-        return;
-      }
+      freshBlocks.push(
+        ...pageResult.blocks
+      );
 
 
-      /*
-       * Find the shortest column
-       * only for APPENDING older
-       * content.
-       *
-       * The initial page remains
-       * strictly chronological.
-       */
-
-      let shortest =
-        columns[0];
-
-
-      for (
-        let i = 1;
-        i < columns.length;
-        i++
+      if (
+        !pageResult.meta?.has_more_pages
       ) {
 
-        if (
-          columns[i].offsetHeight <
-          shortest.offsetHeight
-        ) {
-
-          shortest =
-            columns[i];
-
-        }
+        break;
 
       }
 
+    }
 
-      shortest.appendChild(
-        element
+
+    /*
+     * Deduplicate.
+     */
+
+    const seen =
+      new Set();
+
+
+    freshBlocks =
+      freshBlocks.filter(
+        block => {
+
+          if (
+            seen.has(
+              block.id
+            )
+          ) {
+
+            return false;
+
+          }
+
+
+          seen.add(
+            block.id
+          );
+
+
+          return true;
+
+        }
+      );
+
+
+    sortChronologically(
+      freshBlocks
+    );
+
+
+    loadedChannelBlocks =
+      freshBlocks;
+
+
+    hasMore =
+      result.meta?.has_more_pages
+      || false;
+
+
+    currentPage =
+      Math.min(
+        currentPage,
+        result.meta?.current_page
+        || currentPage
+      );
+
+
+    renderMasonry(
+      loadedChannelBlocks
+    );
+
+
+    updateLoadMore();
+
+
+    /*
+     * Put the visitor back at the exact
+     * scroll position they were using.
+     */
+
+    requestAnimationFrame(
+      function() {
+
+        window.scrollTo(
+          0,
+          oldScroll
+        );
+
+      }
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "AUTO CHANNEL REFRESH ERROR:",
+      error
+    );
+
+  } finally {
+
+    autoRefreshing =
+      false;
+
+  }
+
+}
+
+
+/* ==================================================
+   DEEP CHANNEL SYNCHRONIZATION
+================================================== */
+
+/*
+ * Every FULL_SYNC_INTERVAL we perform
+ * a deeper synchronization.
+ *
+ * This catches edits to older blocks that
+ * aren't currently on page 1.
+ */
+
+async function deepRefreshCurrentChannel() {
+
+  if (
+    !currentChannel ||
+    loading ||
+    autoRefreshing ||
+    document.visibilityState !==
+    "visible"
+  ) {
+
+    return;
+
+  }
+
+
+  autoRefreshing =
+    true;
+
+
+  const requestId =
+    ++viewRequestId;
+
+
+  const oldScroll =
+    getScrollPosition();
+
+
+  try {
+
+    const freshBlocks =
+      await fetchAllChannelBlocks(
+        currentChannel
+      );
+
+
+    if (
+      requestId !==
+      viewRequestId
+    ) {
+
+      return;
+
+    }
+
+
+    if (
+      blocksHaveChanged(
+        loadedChannelBlocks,
+        freshBlocks
+      )
+      ||
+      freshBlocks.length !==
+      loadedChannelBlocks.length
+    ) {
+
+      loadedChannelBlocks =
+        freshBlocks;
+
+
+      renderMasonry(
+        loadedChannelBlocks
+      );
+
+
+      requestAnimationFrame(
+        function() {
+
+          window.scrollTo(
+            0,
+            oldScroll
+          );
+
+        }
       );
 
     }
-  );
+
+
+    hasMore =
+      false;
+
+
+    updateLoadMore();
+
+
+    channelFirstPageCache.set(
+      currentChannel.id,
+      freshBlocks.slice(
+        0,
+        PER_PAGE
+      )
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "DEEP CHANNEL REFRESH ERROR:",
+      error
+    );
+
+  } finally {
+
+    autoRefreshing =
+      false;
+
+  }
 
 }
 
@@ -1800,12 +2759,23 @@ document
       "loading…";
 
 
-    await loadChannelPage(
-      currentChannel,
-      currentPage + 1,
-      false,
-      viewRequestId
-    );
+    try {
+
+      await loadChannelPage(
+        currentChannel,
+        currentPage + 1,
+        false,
+        viewRequestId
+      );
+
+    } catch (error) {
+
+      console.error(
+        "LOAD MORE ERROR:",
+        error
+      );
+
+    }
 
 
     this.textContent =
@@ -1817,21 +2787,6 @@ document
 /* ==================================================
    GET DESCRIPTION
 ================================================== */
-
-/*
- * This function reads your Are.na description.
- *
- * It supports:
- *
- * 1. description as a normal string
- *
- * 2. description.plain
- *
- * 3. description.text
- *
- * This makes the code more tolerant
- * of the way Are.na returns the field.
- */
 
 function getBlockDescription(
   block
@@ -1900,12 +2855,6 @@ function createBlock(
     block.type ===
     "Image"
   ) {
-
-    /*
-     * Make this block an image-block
-     * so the hover CSS applies only
-     * to images.
-     */
 
     wrapper.classList.add(
       "image-block"
@@ -1986,21 +2935,11 @@ function createBlock(
     );
 
 
-    /* ==================================================
-       HOVER DESCRIPTION
-    ================================================== */
-
     const description =
       getBlockDescription(
         block
       );
 
-
-    /*
-     * Only create the hover text
-     * if you actually wrote a description
-     * in Are.na.
-     */
 
     if (
       description
@@ -2016,13 +2955,6 @@ function createBlock(
         "image-note";
 
 
-      /*
-       * textContent is intentional.
-       *
-       * Your Are.na description is treated
-       * as text, not HTML.
-       */
-
       note.textContent =
         description;
 
@@ -2033,17 +2965,6 @@ function createBlock(
 
     }
 
-
-    /* ==================================================
-       TITLE / CAPTION
-    ================================================== */
-
-    /*
-     * IMPORTANT:
-     *
-     * The title remains underneath
-     * the image exactly as before.
-     */
 
     if (block.title) {
 
@@ -2744,6 +3665,21 @@ function startAutoRefresh() {
   }
 
 
+  if (fullSyncTimer) {
+
+    clearInterval(
+      fullSyncTimer
+    );
+
+  }
+
+
+  /*
+   * FAST CHECK
+   *
+   * Every 20 seconds.
+   */
+
   refreshTimer =
     setInterval(
       async function() {
@@ -2766,9 +3702,7 @@ function startAutoRefresh() {
 
         } else {
 
-          await showAll(
-            true
-          );
+          await fastRefreshAll();
 
         }
 
@@ -2776,40 +3710,77 @@ function startAutoRefresh() {
       REFRESH_INTERVAL
     );
 
+
+  /*
+   * DEEP CHECK
+   *
+   * Every 2 minutes.
+   */
+
+  fullSyncTimer =
+    setInterval(
+      async function() {
+
+        if (
+          document.visibilityState !==
+          "visible"
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          Date.now() -
+          lastFullSync <
+          FULL_SYNC_INTERVAL
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          currentChannel
+        ) {
+
+          await deepRefreshCurrentChannel();
+
+        } else {
+
+          await fullRefreshAll(
+            true
+          );
+
+        }
+
+      },
+      FULL_SYNC_INTERVAL
+    );
+
 }
 
 
 /* ==================================================
-   REFRESH CURRENT CHANNEL
+   PAGE VISIBILITY
 ================================================== */
 
-async function refreshCurrentChannel() {
+/*
+ * When the visitor comes back to the
+ * Readymag tab, immediately check Are.na
+ * instead of waiting for the next 20-second
+ * interval.
+ */
 
-  if (
-    !currentChannel ||
-    loading
-  ) {
-
-    return;
-
-  }
-
-
-  const requestId =
-    ++viewRequestId;
-
-
-  try {
-
-    const result =
-      await request(
-        `${API}/channels/${currentChannel.id}/contents?page=1&per=${PER_PAGE}`
-      );
-
+document.addEventListener(
+  "visibilitychange",
+  async function() {
 
     if (
-      requestId !==
-      viewRequestId
+      document.visibilityState !==
+      "visible"
     ) {
 
       return;
@@ -2817,51 +3788,40 @@ async function refreshCurrentChannel() {
     }
 
 
-    const blocks =
-      result.data ||
-      [];
+    if (
+      !channels.length ||
+      autoRefreshing
+    ) {
 
+      return;
 
-    sortChronologically(
-      blocks
-    );
+    }
 
 
     /*
-     * Re-rendering here means that if
-     * you edit a title or description
-     * in Are.na, the updated version
-     * gets pulled into the page.
+     * Small delay lets the browser finish
+     * returning the page to the foreground.
      */
 
-    renderMasonry(
-      blocks
+    await wait(
+      150
     );
 
 
-    hasMore =
-      result.meta?.has_more_pages
-      || false;
+    if (
+      currentChannel
+    ) {
 
+      await refreshCurrentChannel();
 
-    currentPage =
-      result.meta?.current_page
-      || 1;
+    } else {
 
+      await fastRefreshAll();
 
-    updateLoadMore();
-
-
-  } catch (error) {
-
-    console.error(
-      "AUTO REFRESH ERROR:",
-      error
-    );
+    }
 
   }
-
-}
+);
 
 
 /* ==================================================
@@ -2932,6 +3892,10 @@ document.addEventListener(
   }
 );
 
+
+/*
+ * Kept from your original code.
+ */
 
 setInterval(
   updateScrollTopButton,
@@ -3020,23 +3984,49 @@ window.addEventListener(
 
 
           /*
-           * Rebuild the current
-           * view so the chronological
-           * order remains correct
-           * after changing column count.
+           * Rebuild the current view using
+           * already-loaded data where possible.
+           *
+           * This avoids making an unnecessary
+           * API request just because the
+           * browser width changed.
            */
 
           if (
             currentChannel
           ) {
 
-            await refreshCurrentChannel();
+            if (
+              loadedChannelBlocks.length
+            ) {
+
+              renderMasonry(
+                loadedChannelBlocks
+              );
+
+            } else {
+
+              await refreshCurrentChannel();
+
+            }
 
           } else {
 
-            await showAll(
-              true
-            );
+            if (
+              allBlocksCache.length
+            ) {
+
+              renderMasonry(
+                allBlocksCache
+              );
+
+            } else {
+
+              await fullRefreshAll(
+                true
+              );
+
+            }
 
           }
 
